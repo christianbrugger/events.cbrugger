@@ -11,7 +11,7 @@ with open("all_event_ids.txt") as file:
     event_ids = file.read().strip("\n").split("\n")
 
 
-graph = facebook.GraphAPI(password, version='2.8')
+graph = facebook.GraphAPI(access_token, version='2.8')
 
 
 limit = 50
