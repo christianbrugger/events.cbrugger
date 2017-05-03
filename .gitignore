@@ -1,3 +1,6 @@
 credentials.py
 __pycache__
 chromedriver.exe
+all_event_ids.txt
+events.txt
+events.html

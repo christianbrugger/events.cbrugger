@@ -3,6 +3,7 @@ Facebook Events
 
 Collects all Facebook events of all groups a user is in a text and html file.
 
+
 How to run:
 -----------
 
@@ -23,6 +24,17 @@ python parse_events_from_file.py
 This will generate the text and html file ```events.txt``` and ```events.html```.
 
 I then edit the index.html by hand.
+
+
+Credentials:
+------------
+
+Copy the file ```credentials_template.py``` and name it ```credentials.py```.
+
+Enter your Facebook username and password. Then create an access token by
+going to the site ```https://developers.facebook.com/tools/explorer```.
+I allowed all permissions for simplicity.
+
 
 Dependencies:
 -------------

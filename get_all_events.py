@@ -88,19 +88,31 @@ def get_group_events(gid):
 
 group_ids = get_groups()
 
+print("Found {} groups.".format(len(group_ids)))
+
 all_group_events = set([])
 
-for group_id in group_ids:
+for index, group_id in enumerate(group_ids, start=1):
+    print("Fetching events {} of {}.".format(index, len(group_ids)),
+          end=" ")
     group_events = get_group_events(group_id)
     all_group_events.update(group_events)
-
+    print("Found {} events.".format(len(group_events)))
 
 # store results
 
-for event_id in all_group_events:
-        print(event_id)
+print("Found {} events.".format(len(all_group_events)))
+
+#for event_id in all_group_events:
+#        print(event_id)
 
 with open('all_event_ids.txt', 'w') as file:
     for event_id in all_group_events:
         file.write(event_id + "\n")
 
+
+# exit chrome
+
+driver.close()
+
+print("Done...")
