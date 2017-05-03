@@ -37,7 +37,9 @@ The main interpreter.
 
 I downloaded it from
 
+```
 https://github.com/mobolic/facebook-sdk.git
+```
 
 and installed it with:
 
@@ -64,8 +66,8 @@ Latest Chrome browser
 
 ### Chromedriver ###
 
-Latest ```chromedriver.exe``` from https://sites.google.com/a/chromium.org/chromedriver/
+Latest ```chromedriver.exe``` from ```https://sites.google.com/a/chromium.org/chromedriver/```
 
-I put the ```chromedriver.exe``` in the same directory of the python files. Otherwise it has to be in path. 
+I put the ```chromedriver.exe``` in the same directory of the python files.
 
 *tested with version 2.29.461591*
