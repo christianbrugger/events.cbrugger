@@ -1,6 +1,7 @@
 import pprint
 import time
 import datetime
+import os
 
 import dateutil.parser
 import dateutil.tz
@@ -101,6 +102,7 @@ sorted_info = sorted(all_group_info.values(),
 """
 
 # get my event responses
+
 all_rsvp_raw = list(graph.get_all_connections("me", "events", fields="id,rsvp_status"))
 all_rsvp = {item['id']:item['rsvp_status'] for item in all_rsvp_raw}
 print(all_rsvp)
@@ -109,6 +111,7 @@ print("got data")
 
 
 # simple text output
+
 with open("events.txt", 'w', encoding="utf-8") as f:
     for info in sorted_data:
         f.write(#info["start_time"] + '\n' +
@@ -125,14 +128,14 @@ def html_output(filename, output_data):
     # html output
     with open(filename, 'w', encoding="utf-8") as f:
         f.write("""
-    <!DOCTYPE html>
-    <html lang="en">
-      <head>
-        <meta charset="utf-8">
-        <title>Events</title>
-        <link rel="stylesheet" href="style.css">
-      </head>
-      <body>
+        <!DOCTYPE html>
+        <html lang="en">
+          <head>
+            <meta charset="utf-8">
+            <title>Events</title>
+            <link rel="stylesheet" href="style.css">
+          </head>
+          <body>
         """)
         
         last_day = None
@@ -180,12 +183,36 @@ def html_output(filename, output_data):
         
         f.write("  </body>\n</html>\n")
 
-html_output("events.html", sorted_data)
 
-evening_workshops = [info for info in sorted_data if info["event_type"] in [TYPE_RECURRING, TYPE_EVENING, TYPE_WORKSHOP] and
+suffix = datetime.datetime.now().strftime("%Y_%m_%d")
+html_output("events_{}.html".format(suffix), sorted_data)
+
+evening_workshops = [info for info in sorted_data if info
+                     ["event_type"] in [TYPE_RECURRING, TYPE_EVENING, TYPE_WORKSHOP] and
                      "berlin" in info["location"].lower() and info["datetime"].hour > 17]
+html_output("events_{}_evening.html".format(suffix), evening_workshops)
 
 
-html_output("events_evening.html", evening_workshops)
+def update_index():
+    with open("index.html", 'w', encoding="utf-8") as f:
+        f.write("""
+        <!DOCTYPE html>
+        <html lang="en">
+          <head>
+            <meta charset="utf-8">
+            <title>Events</title>
+            <link rel="stylesheet" href="style.css">
+          </head>
+          <body>
+        """)
+
+        for filename in sorted(os.listdir(".")):
+            if filename.startswith("events_"):
+                f.write('<h1><a class="" href="{}">{}</a></h1>\n'.format(
+                    filename, os.path.splitext(filename)[0]))
+        
+        f.write("  </body>\n</html>\n")
+
+update_index()
 
 print("done")
