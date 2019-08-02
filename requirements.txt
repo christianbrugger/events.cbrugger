@@ -1,0 +1,14 @@
+
+# selenium
+selenium==3.141.0
+urllib3==1.25.3
+
+# facebook-sdk
+certifi==2019.6.16
+chardet==3.0.4
+facebook-sdk==3.1.0
+idna==2.8
+requests==2.22.0
+
+# dateutil
+python-dateutil==2.8.0

@@ -4,13 +4,14 @@ import re
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.chrome.options import Options
+from selenium.common.exceptions import NoSuchElementException
 
 from credentials import username
 from credentials import password
 
 
 def scroll_to_bottom():
-    SCROLL_PAUSE_TIME = 1.
+    SCROLL_PAUSE_TIME = 3.
     # Get scroll height
     last_height = driver.execute_script("return document.body.scrollHeight")
     while True:
@@ -39,7 +40,7 @@ options.add_experimental_option('prefs', {
     }
 })
 
-driver = webdriver.Chrome(chrome_options=options)
+driver = webdriver.Chrome(options=options)
 
 # login
 
@@ -52,12 +53,10 @@ elem.send_keys(password)
 elem.send_keys(Keys.RETURN)
 
 
-
-
 def get_groups():
-    driver.get("https://www.facebook.com/groups/?category=groups")
+    driver.get("https://www.facebook.com/bookmarks/groups/")
 
-    scroll_to_bottom()
+    #scroll_to_bottom()
 
     group_ids = set([])
     for elem in driver.find_elements_by_tag_name("a"):
@@ -70,27 +69,42 @@ def get_groups():
     return group_ids
 
 
+# get all event ids
+
+group_ids = get_groups()
+#group_ids = set(['EventsinBerlin'])
+
+print("Found {} groups.".format(len(group_ids)))
+
+
+
 def get_group_events(gid):
+    print(gid)
+    
     driver.get("https://www.facebook.com/groups/" + gid + "/events/")
 
     scroll_to_bottom()
 
-    event_ids = set([])
+    event_ids = {}
     for calendar_elem in driver.find_elements_by_class_name("fbCalendarItem"):
         url = calendar_elem.find_element_by_tag_name("a").get_property("href")
-        event_ids.add(re.findall("\d+", url)[0])
+        id_ = re.findall("\d+", url)[0]
+        img = calendar_elem.find_element_by_tag_name("img").get_property("src")
+        name = calendar_elem.find_element_by_class_name("fsl").find_element_by_tag_name("a").text
+        try:
+            location = calendar_elem.find_element_by_class_name("_5inl").text
+        except NoSuchElementException:
+            location = ""
+        try:
+            location += " in " + calendar_elem.find_element_by_class_name("_5inm").text
+        except NoSuchElementException:
+            pass
+        event_ids[id_] = name, location, img
 
     return event_ids
 
 
-
-# get all event ids
-
-group_ids = get_groups()
-
-print("Found {} groups.".format(len(group_ids)))
-
-all_group_events = set([])
+all_group_events = {}
 
 for index, group_id in enumerate(group_ids, start=1):
     print("Fetching events {} of {}.".format(index, len(group_ids)),
@@ -99,6 +113,7 @@ for index, group_id in enumerate(group_ids, start=1):
     all_group_events.update(group_events)
     print("Found {} events.".format(len(group_events)))
 
+
 # store results
 
 print("Found {} events.".format(len(all_group_events)))
@@ -106,9 +121,10 @@ print("Found {} events.".format(len(all_group_events)))
 #for event_id in all_group_events:
 #        print(event_id)
 
-with open('all_event_ids.txt', 'w') as file:
-    for event_id in all_group_events:
-        file.write(event_id + "\n")
+with open('all_event_ids.txt', 'w', encoding="utf-8") as file:
+    for event_id, data in all_group_events.items():
+        line = event_id + "<"+ "<".join(data) + "\n"
+        file.write(line)
 
 
 # exit chrome
