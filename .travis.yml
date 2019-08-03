@@ -17,5 +17,4 @@ script:
     - python travis/test_parser.py
 
 after_success:
-    - chmod +x travis/push_results.sh
     - travis/push_results.sh
