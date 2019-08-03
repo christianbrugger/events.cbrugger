@@ -65,6 +65,9 @@ with open("all_event_ids.txt", encoding="utf-8") as file:
         try:
             dt_start = times[id_]["dt_start"]
             event_type = times[id_]["event_type"]
+            if dt_start.date() < datetime.datetime.now().date():
+                print("Skipping event, event is in the past:", id_, name)
+                continue
         except KeyError:
             print("Event without time information:", id_, name)
         data.append({"id": id_, "name": name, "location": location, "image": image,
@@ -74,40 +77,18 @@ with open("all_event_ids.txt", encoding="utf-8") as file:
 sorted_data = sorted(data, key=lambda x: x['datetime'])
 
 
-graph = facebook.GraphAPI(access_token, version='2.8')
-
-"""
-limit = 50
-all_group_info = {}
-while event_ids:
-    chunk = event_ids[:limit]
-    del event_ids[:limit]
-
-    print(chunk)
-    import sys
-    sys.exit()
-    
-    group_info = graph.get_objects(
-            ids=chunk, fields="start_time, name, picture.type(normal), place")
-
-    for result_dict in group_info.values():
-        result_dict["py_start_time"] = datetime.datetime.strptime(
-                result_dict["start_time"], '%Y-%m-%dT%H:%M:%S%z')
-    all_group_info.update(group_info)
-
-
-sorted_info = sorted(all_group_info.values(),
-                     key=lambda x: x['py_start_time'])
-
-"""
-
 # get my event responses
+
+"""
+graph = facebook.GraphAPI(access_token, version='2.8')
 
 all_rsvp_raw = list(graph.get_all_connections("me", "events", fields="id,rsvp_status"))
 all_rsvp = {item['id']:item['rsvp_status'] for item in all_rsvp_raw}
+
 print(all_rsvp)
 print("got data")
-
+"""
+all_rsvp = {}
 
 
 # simple text output

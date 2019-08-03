@@ -9,6 +9,11 @@ from selenium.common.exceptions import NoSuchElementException
 from credentials import username
 from credentials import password
 
+ignored_group_ids = [
+    'liveinberlin',
+    'EventsinBerlin',
+]
+
 
 def scroll_to_bottom():
     SCROLL_PAUSE_TIME = 3.
@@ -64,7 +69,11 @@ def get_groups():
         if url.startswith("https://www.facebook.com/groups/"):
             match = re.match("https://www.facebook.com/groups/([0-9a-zA-Z.]+)/", url)
             if match:
-                group_ids.add(match.group(1))
+                group_id = match.group(1)
+                if group_id in ignored_group_ids:
+                    print("ignoring", group_id)
+                else:
+                    group_ids.add(group_id)
 
     return group_ids
 
