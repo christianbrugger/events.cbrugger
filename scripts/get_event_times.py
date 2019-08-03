@@ -50,6 +50,8 @@ options.add_experimental_option('prefs', {
 
 driver = webdriver.Chrome(options=options)
 
+print("Driver started")
+
 # login
 
 driver.get("http://www.facebook.org")
@@ -59,6 +61,8 @@ elem.send_keys(username)
 elem = driver.find_element_by_id("pass")
 elem.send_keys(password)
 elem.send_keys(Keys.RETURN)
+
+print("Login completed")
 
 
 
