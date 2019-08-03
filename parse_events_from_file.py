@@ -15,7 +15,7 @@ class EventType:
     def __str__(self):
         return self.label
     
-class Evening(EventType):
+class Session(EventType):
     def __init__(self):
         super().__init__("Evening")
     
@@ -66,7 +66,7 @@ with open("all_event_times.txt", encoding="utf-8") as file:
                 elif hours > 5:
                     event_type = Workshop(hours)
                 else:
-                    event_type = Evening()
+                    event_type = Session()
         else:
             dt_time = dateutil.parser.parse(from_str).astimezone(tzlocal)
             event_type = Unknown()
@@ -199,7 +199,7 @@ html_output("events_{}_berlin.html".format(suffix), berlin_workshops)
 
 # html evening
 evening_workshops = [info for info in sorted_data if 
-                     isinstance(info["event_type"], (Recurring, Evening, Workshop)) and
+                     isinstance(info["event_type"], (Recurring, Session, Workshop)) and
                      "berlin" in info["location"].lower() and info["datetime"].hour > 17]
 html_output("events_{}_evening.html".format(suffix), evening_workshops)
 
