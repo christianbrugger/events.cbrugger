@@ -13,12 +13,8 @@ commit_website_files() {
 }
 
 upload_files() {
-  git remote add originA https://$GH_TOKEN@github.com/christianbrugger/events.cbrugger.git
-  git remote add originB https://$GH_TOKEN@github.com/christianbrugger/events.cbrugger.git > /dev/null 2>&1
-  git remote add origin https://${GH_TOKEN}@github.com/christianbrugger/events.cbrugger.git > /dev/null 2>&1
-  echo https://${GH_TOKEN}@github.com
-  git remote -v
-  git push --quiet --set-upstream origin master
+  git remote add origin-push https://${GH_TOKEN}@github.com/christianbrugger/events.cbrugger.git > /dev/null 2>&1
+  git push --quiet --set-upstream origin-push master
 }
 
 setup_git
