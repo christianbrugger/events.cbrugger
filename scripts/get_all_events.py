@@ -18,6 +18,9 @@ except ImportError:
 IS_HEADLESS = len(sys.argv) >= 2 and sys.argv[1] == "--headless"
 FILE_TAG = os.environ.get("FILE_TAG", "")
 
+if IS_HEADLESS:
+    print("running in headless mode")
+
 
 ignored_group_ids = [
     'liveinberlin',
