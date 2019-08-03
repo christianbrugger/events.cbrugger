@@ -122,5 +122,3 @@ with open(filepath, 'w', encoding="utf-8") as file:
 driver.close()
 
 print("Done...")
-
-sys.exit()

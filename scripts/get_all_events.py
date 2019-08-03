@@ -135,14 +135,11 @@ for index, group_id in enumerate(group_ids, start=1):
     all_group_events.update(group_events)
     print("Found {} events.".format(len(group_events)))
 
-    if all_group_events:
-        break
+print("Found {} events.".format(len(all_group_events)))
 
 assert len(all_group_events) > 0
 
 # store results
-
-print("Found {} events.".format(len(all_group_events)))
 
 filename = '{}_all_event_ids.txt'.format(FILE_TAG)
 filepath = os.path.join(os.path.dirname(__file__), "..", "results", filename)
@@ -159,5 +156,3 @@ print("written", filename)
 driver.close()
 
 print("Done...")
-
-sys.exit()
