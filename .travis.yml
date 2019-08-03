@@ -15,3 +15,6 @@ python:
  
 script:
     - python travis/test_parser.py
+    
+after_success:
+    - travis/push_results.sh

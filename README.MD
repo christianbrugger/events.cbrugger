@@ -118,3 +118,9 @@ https://sites.google.com/a/chromium.org/chromedriver/
 I put the `chromedriver.exe` in the same directory as the python files.
 
 *tested with version 75.0.3770.140*
+
+Travis
+------
+
+Generate github token with permission `public_repo` at https://github.com/settings/tokens under developer settings.
+Store this token in travis as environment variable in the project settings.
