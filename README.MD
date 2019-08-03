@@ -19,6 +19,7 @@ This will generate the file `all_event_ids.txt` containing all event ids.
 Then run
 
 ```
+python get_event_times.py
 ```
 
 This will collect all event times in `all_event_times.txt`.
