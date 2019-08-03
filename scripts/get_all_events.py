@@ -96,6 +96,8 @@ group_ids = get_groups()
 
 print("Found {} groups.".format(len(group_ids)))
 
+assert len(group_ids) > 0
+
 
 
 def get_group_events(gid):
@@ -136,6 +138,7 @@ for index, group_id in enumerate(group_ids, start=1):
     if all_group_events:
         break
 
+assert len(all_group_events) > 0
 
 # store results
 

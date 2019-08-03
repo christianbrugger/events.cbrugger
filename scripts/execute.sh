@@ -1,5 +1,7 @@
 #!/bin/sh
 
+set -e
+
 export FILE_TAG=`date +"%Y_%m_%d__%H_%M"`
 
 
