@@ -31,7 +31,7 @@ with open(filepath, encoding="utf-8") as file:
     for line in lines:
         event_ids.append(line.split("<")[0])
 
-print("Imported {} events.".format(len(event_ids)))
+print("Imported {} events.".format(len(event_ids)), flush=True)
 
 # create driver
 
@@ -50,7 +50,7 @@ options.add_experimental_option('prefs', {
 
 driver = webdriver.Chrome(options=options)
 
-print("Driver started")
+print("Driver started", flush=True)
 
 # login
 
@@ -62,7 +62,7 @@ elem = driver.find_element_by_id("pass")
 elem.send_keys(password)
 elem.send_keys(Keys.RETURN)
 
-print("Login completed")
+print("Login completed", flush=True)
 
 
 
@@ -102,14 +102,14 @@ def get_event_time(eid):
 
 event_times = {}
 for index, event_id in enumerate(event_ids, start=1):
-    print("Fetching events {} of {}.".format(index, len(event_ids)), end=" ")
+    print("Fetching events {} of {}.".format(index, len(event_ids)), flush=True)
     event_times[event_id] = get_event_time(event_id)
-    print(event_id, event_times[event_id])
+    print(event_id, event_times[event_id], flush=True)
 
 
 # store results
 
-print("Processed {} events.".format(len(event_ids)))
+print("Processed {} events.".format(len(event_ids)), flush=True)
 
 
 filename = '{}_all_event_times.txt'.format(FILE_TAG)
@@ -120,9 +120,11 @@ with open(filepath, 'w', encoding="utf-8") as file:
         line = event_id + "<"+ "<".join(data) + "\n"
         file.write(line)
 
+print("written", filename, flush=True)
+
 
 # exit chrome
 
 driver.close()
 
-print("Done...")
+print("Done...", flush=True)

@@ -19,7 +19,7 @@ IS_HEADLESS = len(sys.argv) >= 2 and sys.argv[1] == "--headless"
 FILE_TAG = os.environ.get("FILE_TAG", "")
 
 if IS_HEADLESS:
-    print("running in headless mode")
+    print("running in headless mode", flush=True)
 
 
 ignored_group_ids = [
@@ -64,7 +64,7 @@ options.add_experimental_option('prefs', {
 
 driver = webdriver.Chrome(options=options)
 
-print("Driver started")
+print("Driver started", flush=True)
 
 # login
 
@@ -76,7 +76,7 @@ elem = driver.find_element_by_id("pass")
 elem.send_keys(password)
 elem.send_keys(Keys.RETURN)
 
-print("Login completed")
+print("Login completed", flush=True)
 
 
 def get_groups():
@@ -101,7 +101,7 @@ def get_groups():
 
 group_ids = get_groups()
 
-print("Found {} groups.".format(len(group_ids)))
+print("Found {} groups.".format(len(group_ids)), flush=True)
 
 assert len(group_ids) > 0
 
@@ -136,11 +136,10 @@ def get_group_events(gid):
 all_group_events = {}
 
 for index, group_id in enumerate(group_ids, start=1):
-    print("Fetching events {} of {}.".format(index, len(group_ids)),
-          end=" ")
+    print("Fetching events {} of {}.".format(index, len(group_ids)), flush=True)
     group_events = get_group_events(group_id)
     all_group_events.update(group_events)
-    print("Found {} events.".format(len(group_events)))
+    print("Found {} events.".format(len(group_events)), flush=True)
 
 print("Found {} events.".format(len(all_group_events)))
 
@@ -156,10 +155,10 @@ with open(filepath, 'w', encoding="utf-8") as file:
         line = event_id + "<" + "<".join(data) + "\n"
         file.write(line)
 
-print("written", filename)
+print("written", filename, flush=True)
 
 # exit chrome
 
 driver.close()
 
-print("Done...")
+print("Done...", flush=True)

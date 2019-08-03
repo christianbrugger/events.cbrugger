@@ -109,7 +109,7 @@ with open(filepath_ids, encoding="utf-8") as file:
 
 sorted_data = sorted(data, key=lambda x: x['datetime'])
 
-print("Imported {} events.".format(len(sorted_data)))
+print("Imported {} events.".format(len(sorted_data)), flush=True)
 
 # get my event responses
 
@@ -194,7 +194,7 @@ def html_output(filename, output_data):
                        event_type=info["event_type"]))
         
         f.write("  </body>\n</html>\n")
-    print("written", filename)
+    print("written", filename, flush=True)
 
 if not FILE_TAG:
     FILE_TAG = datetime.datetime.now().strftime("%Y_%m_%d__%H_%M")
@@ -236,7 +236,7 @@ def update_index(filepath):
                     filename, os.path.splitext(filename)[0]))
         
         f.write("  </body>\n</html>\n")
-    print("written", filepath)
+    print("written", filepath, flush=True)
 
 update_index(os.path.join(dirpath, "index.html"))
 
