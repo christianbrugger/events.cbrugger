@@ -10,14 +10,14 @@ setup_git() {
 
 commit_website_files() {
   git checkout master
-  git pull
+  git pull > /dev/null 2>&1
   git add results/*.txt
   git add results/*.html
   git commit --message "Travis build: $TRAVIS_BUILD_NUMBER"
 }
 
 upload_files() {
-  git push --quiet --set-upstream origin-push master
+  git push --quiet --set-upstream origin-push master > /dev/null 2>&1
 }
 
 setup_git
