@@ -8,13 +8,14 @@ before_script:
     - LATEST_CHROMEDRIVER_VERSION=`curl -s "https://chromedriver.storage.googleapis.com/LATEST_RELEASE"`
     - curl "https://chromedriver.storage.googleapis.com/${LATEST_CHROMEDRIVER_VERSION}/chromedriver_linux64.zip" -O
     - unzip chromedriver_linux64.zip -d ~/bin
- 
+
 language: python
 python:
     - '3.7'
  
 script:
     - python travis/test_parser.py
-    
+
 after_success:
+    - chmod +x travis/push_results.sh
     - travis/push_results.sh
