@@ -1,5 +1,6 @@
 scripts/credentials.py
 chromedriver.exe
+chromedriver
 __pycache__
 all_event_ids*.txt
 all_event_times*.txt

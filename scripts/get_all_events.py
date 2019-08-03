@@ -1,13 +1,23 @@
 import time
 import re
+import os
+import sys
 
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.chrome.options import Options
 from selenium.common.exceptions import NoSuchElementException
 
-from credentials import username
-from credentials import password
+try:
+    from credentials import username
+    from credentials import password
+except ImportError:
+    username = os.environ["FB_USERNAME"]
+    password = os.environ["FB_PASSWORD"]
+
+IS_HEADLESS = len(sys.argv) >= 2 and sys.argv[1] == "--headless"
+FILE_TAG = os.environ.get("FILE_TAG", "")
+
 
 ignored_group_ids = [
     'liveinberlin',
@@ -37,7 +47,11 @@ def scroll_to_bottom():
 # create driver
 
 options = Options()
-options.add_argument("--disable-notifications");
+if IS_HEADLESS:
+    options.add_argument("--headless")  
+    options.add_argument("--disable-gpu")
+    options.add_argument('--no-sandbox')
+options.add_argument("--disable-notifications")
 options.add_experimental_option('prefs', {
     'credentials_enable_service': False,
     'profile': {
@@ -81,7 +95,6 @@ def get_groups():
 # get all event ids
 
 group_ids = get_groups()
-#group_ids = set(['EventsinBerlin'])
 
 print("Found {} groups.".format(len(group_ids)))
 
@@ -122,19 +135,23 @@ for index, group_id in enumerate(group_ids, start=1):
     all_group_events.update(group_events)
     print("Found {} events.".format(len(group_events)))
 
+    if all_group_events:
+        break
+
 
 # store results
 
 print("Found {} events.".format(len(all_group_events)))
 
-#for event_id in all_group_events:
-#        print(event_id)
+filename = '{}_all_event_ids.txt'.format(FILE_TAG)
+filepath = os.path.join(os.path.dirname(__file__), "..", "results", filename)
 
-with open('all_event_ids.txt', 'w', encoding="utf-8") as file:
+with open(filepath, 'w', encoding="utf-8") as file:
     for event_id, data in all_group_events.items():
-        line = event_id + "<"+ "<".join(data) + "\n"
+        line = event_id + "<" + "<".join(data) + "\n"
         file.write(line)
 
+print("written", filename)
 
 # exit chrome
 

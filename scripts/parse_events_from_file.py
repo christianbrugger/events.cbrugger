@@ -7,7 +7,9 @@ import dateutil.parser
 import dateutil.tz
 import facebook
 
-from credentials import access_token
+#from credentials import access_token
+
+FILE_TAG = os.environ.get("FILE_TAG", "")
 
 class EventType:
     def __init__(self, label, recurring=False):
@@ -60,9 +62,11 @@ def parse_time(from_to, is_recurring=True):
 
 
 
+filename = '{}_all_event_times.txt'.format(FILE_TAG)
+filepath_times = os.path.join(os.path.dirname(__file__), "..", "results", filename)
 
 times = {}
-with open("all_event_times.txt", encoding="utf-8") as file:
+with open(filepath_times, encoding="utf-8") as file:
     lines = file.read().strip("\n").split("\n")
     for line in lines:
         id_, from_to, *recurring_times = line.split("<")
@@ -74,8 +78,11 @@ with open("all_event_times.txt", encoding="utf-8") as file:
             times[id_] = [parse_time(from_to, False)]
         
 
+filename = '{}_all_event_ids.txt'.format(FILE_TAG)
+filepath_ids = os.path.join(os.path.dirname(__file__), "..", "results", filename)
+
 data = []
-with open("all_event_ids.txt", encoding="utf-8") as file:
+with open(filepath_ids, encoding="utf-8") as file:
     lines = file.read().strip("\n").split("\n")
     for line in lines:
         id_, name, location, image = line.split("<")
@@ -117,15 +124,12 @@ all_rsvp = {}
 
 # simple text output
 
-with open("events.txt", 'w', encoding="utf-8") as f:
-    for info in sorted_data:
-        f.write(#info["start_time"] + '\n' +
-                info["name"] + '\n' +
-                "https://www.facebook.com/events/" + info["id"] + '\n\n')
-
-
-
-print("writen events.txt")
+# with open("events.txt", 'w', encoding="utf-8") as f:
+#     for info in sorted_data:
+#         f.write(#info["start_time"] + '\n' +
+#                 info["name"] + '\n' +
+#                 "https://www.facebook.com/events/" + info["id"] + '\n\n')
+# print("writen events.txt")
 
 
 def html_output(filename, output_data):
@@ -189,26 +193,29 @@ def html_output(filename, output_data):
         f.write("  </body>\n</html>\n")
     print("written", filename)
 
+if not FILE_TAG:
+    FILE_TAG = datetime.datetime.now().strftime("%Y_%m_%d__%H_%M")
 
-suffix = datetime.datetime.now().strftime("%Y_%m_%d")
+
+dirpath = os.path.join(os.path.dirname(__file__), "..", "results")
 
 # html all
-html_output("events_{}.html".format(suffix), sorted_data)
+html_output(os.path.join(dirpath, "events_{}.html".format(FILE_TAG)), sorted_data)
 
 
 # html berlin
 berlin_workshops = [info for info in sorted_data if "berlin" in info["location"].lower()]
-html_output("events_{}_berlin.html".format(suffix), berlin_workshops)
+html_output(os.path.join(dirpath, "events_{}_berlin.html".format(FILE_TAG)), berlin_workshops)
 
 # html evening
 evening_workshops = [info for info in sorted_data if 
                      isinstance(info["event_type"], (Session, Workshop)) and
                      "berlin" in info["location"].lower() and info["datetime"].hour > 17]
-html_output("events_{}_evening.html".format(suffix), evening_workshops)
+html_output(os.path.join(dirpath, "events_{}_evening.html".format(FILE_TAG)), evening_workshops)
 
 
-def update_index():
-    with open("index.html", 'w', encoding="utf-8") as f:
+def update_index(filepath):
+    with open(filepath, 'w', encoding="utf-8") as f:
         f.write("""
         <!DOCTYPE html>
         <html lang="en">
@@ -220,13 +227,13 @@ def update_index():
           <body>
         """)
 
-        for filename in sorted(os.listdir(".")):
+        for filename in sorted(os.listdir(os.path.dirname(filepath))):
             if filename.startswith("events_"):
                 f.write('<h1><a class="" href="{}">{}</a></h1>\n'.format(
                     filename, os.path.splitext(filename)[0]))
         
         f.write("  </body>\n</html>\n")
-    print("written index.html")
+    print("written", filepath)
 
-update_index()
+update_index(os.path.join(dirpath, "index.html"))
 
