@@ -14,6 +14,8 @@ commit_website_files() {
 
 upload_files() {
   git remote add origin https://${GH_TOKEN}@github.com/christianbrugger/events.cbrugger.git > /dev/null 2>&1
+  echo ${GH_TOKEN}
+  git remote -v
   git push --quiet --set-upstream origin master
 }
 
