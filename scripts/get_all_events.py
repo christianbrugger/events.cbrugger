@@ -46,6 +46,8 @@ def scroll_to_bottom():
 
 # create driver
 
+driver = webdriver.Chrome(options=options)
+
 options = Options()
 if IS_HEADLESS:
     options.add_argument("--headless")  
@@ -69,13 +71,9 @@ elem = driver.find_element_by_id("pass")
 elem.send_keys(password)
 elem.send_keys(Keys.RETURN)
 
-print(driver.page_source)
-
 
 def get_groups():
     driver.get("https://www.facebook.com/bookmarks/groups/")
-
-    #scroll_to_bottom()
 
     group_ids = set([])
     for elem in driver.find_elements_by_tag_name("a"):
