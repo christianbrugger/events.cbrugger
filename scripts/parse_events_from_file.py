@@ -10,6 +10,7 @@ import facebook
 #from credentials import access_token
 
 FILE_TAG = os.environ.get("FILE_TAG", "")
+TIMEZONE = "Europe/Berlin"
 
 class EventType:
     def __init__(self, label, recurring=False):
@@ -37,12 +38,14 @@ class Unknown(EventType):
 
 # parse time
 
+
+
 def parse_time(from_to, is_recurring=True):
-    tzlocal = dateutil.tz.tzlocal()
+    tz = dateutil.tz.gettz(TIMEZONE)
     if " to " in from_to:
         from_str, to_str = from_to.split(" to ")
-        dt_from = dateutil.parser.parse(from_str).astimezone(tzlocal)
-        dt_to = dateutil.parser.parse(to_str).astimezone(tzlocal)
+        dt_from = dateutil.parser.parse(from_str).astimezone(tz)
+        dt_to = dateutil.parser.parse(to_str).astimezone(tz)
 
         dt_start = dt_from
 
@@ -55,7 +58,7 @@ def parse_time(from_to, is_recurring=True):
         else:
             event_type = Session(is_recurring)
     else:
-        dt_start = dateutil.parser.parse(from_to).astimezone(tzlocal)
+        dt_start = dateutil.parser.parse(from_to).astimezone(tz)
         event_type = Unknown()
     
     return {"dt_start": dt_start, "event_type": event_type}
