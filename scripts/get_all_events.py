@@ -159,3 +159,5 @@ print("written", filename)
 driver.close()
 
 print("Done...")
+
+sys.exit()
