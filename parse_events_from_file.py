@@ -76,6 +76,7 @@ with open("all_event_ids.txt", encoding="utf-8") as file:
 
 sorted_data = sorted(data, key=lambda x: x['datetime'])
 
+print("Imported {} events.".format(len(sorted_data)))
 
 # get my event responses
 
@@ -101,7 +102,7 @@ with open("events.txt", 'w', encoding="utf-8") as f:
 
 
 
-print("writen text output")
+print("writen events.txt")
 
 
 def html_output(filename, output_data):
@@ -163,6 +164,7 @@ def html_output(filename, output_data):
                        event_type=info["event_type"]))
         
         f.write("  </body>\n</html>\n")
+    print("written", filename)
 
 
 suffix = datetime.datetime.now().strftime("%Y_%m_%d")
@@ -193,7 +195,7 @@ def update_index():
                     filename, os.path.splitext(filename)[0]))
         
         f.write("  </body>\n</html>\n")
+    print("written index.html")
 
 update_index()
 
-print("done")
