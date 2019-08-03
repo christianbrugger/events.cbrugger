@@ -49,8 +49,9 @@ elem.send_keys(Keys.RETURN)
 
 def parse_event_time(item):
     try:
-        from_to = driver.find_element_by_class_name("_2ycp").get_attribute("content")
+        from_to = item.find_element_by_class_name("_2ycp").get_attribute("content")
     except NoSuchElementException:
+        print("exception")
         from_to = ""
     return from_to
 
@@ -61,12 +62,21 @@ def get_event_time(eid):
     # check for time slots
     slots = driver.find_elements_by_class_name("_3h4x")
     if slots:
-        # open first event
-        href = slots[0].find_element_by_tag_name("a").get_attribute("href")
-        driver.get(href)
-        return parse_event_time(driver), "recurring"
+        # open first 3 times
+        links = []
+        for link in slots[0].find_elements_by_tag_name("a"):
+            href = link.get_attribute("href")
+            if "event_time_id" in href:
+                links.append(str(href))
+        
+        times = []
+        for link in links:
+            driver.get(link)
+            times.append(parse_event_time(driver))
+        
+        return ("recurring",) + tuple(times)
     else:
-        return parse_event_time(driver), ""
+        return (parse_event_time(driver),)
 
 
 event_times = {}

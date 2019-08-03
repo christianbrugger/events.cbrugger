@@ -33,36 +33,46 @@ class Unknown(EventType):
     def __init__(self):
         super().__init__("")
 
+# parse time
+
+def parse_time(from_to, is_recurring=True):
+    if " to " in from_to:
+        from_str, to_str = from_to.split(" to ")
+        tzlocal = dateutil.tz.tzlocal()
+        dt_from = dateutil.parser.parse(from_str).astimezone(tzlocal)
+        dt_to = dateutil.parser.parse(to_str).astimezone(tzlocal)
+
+        dt_start = dt_from
+
+        td = dt_to - dt_from
+        days, hours, seconds = td.days, td.seconds//3600, (td.seconds//60)%60
+        if days > 0:
+            event_type = Retreat(days + 1, is_recurring)
+        elif hours > 5:
+            event_type = Workshop(hours, is_recurring)
+        else:
+            event_type = Session(is_recurring)
+    else:
+        dt_start = dateutil.parser.parse(from_str).astimezone(tzlocal)
+        event_type = Unknown()
+    
+    return {"dt_start": dt_start, "event_type": event_type}
+
+
+
+
 times = {}
 with open("all_event_times.txt", encoding="utf-8") as file:
     lines = file.read().strip("\n").split("\n")
     for line in lines:
-        id_, from_to, recurring = line.split("<")
-        is_recurring = bool(recurring)
+        id_, from_to, *recurring_times = line.split("<")
+        is_recurring = from_to == "recurring"
 
-        # time
-        if " to " in from_to:
-            from_str, to_str = from_to.split(" to ")
-            tzlocal = dateutil.tz.tzlocal()
-            dt_from = dateutil.parser.parse(from_str).astimezone(tzlocal)
-            dt_to = dateutil.parser.parse(to_str).astimezone(tzlocal)
-
-            dt_start = dt_from
-
-            td = dt_to - dt_from
-            days, hours, seconds = td.days, td.seconds//3600, (td.seconds//60)%60
-            if days > 0:
-                event_type = Retreat(days + 1, is_recurring)
-            elif hours > 5:
-                event_type = Workshop(hours, is_recurring)
-            else:
-                event_type = Session(is_recurring)
+        if is_recurring:
+            times[id_] = list(map(parse_time, recurring_times))
         else:
-            dt_start = dateutil.parser.parse(from_str).astimezone(tzlocal)
-            event_type = Unknown()
+            times[id_] = [parse_time(from_to, False)]
         
-
-        times[id_] = {"dt_start": dt_start, "event_type": event_type}
 
 data = []
 with open("all_event_ids.txt", encoding="utf-8") as file:
@@ -70,15 +80,21 @@ with open("all_event_ids.txt", encoding="utf-8") as file:
     for line in lines:
         id_, name, location, image = line.split("<")
         try:
-            dt_start = times[id_]["dt_start"]
-            event_type = times[id_]["event_type"]
-            if dt_start.date() < datetime.datetime.now().date():
-                print("Skipping event, event is in the past:", id_, name)
-                continue
+            event_times = times[id_]
         except KeyError:
             print("Event without time information:", id_, name)
-        data.append({"id": id_, "name": name, "location": location, "image": image,
-                     "datetime": dt_start, "event_type": event_type})
+            continue
+        else:
+            for event_time in event_times:
+                dt_start = event_time["dt_start"]
+                event_type = event_time["event_type"]
+                
+                if dt_start.date() < datetime.datetime.now().date():
+                    print("Skipping event, event is in the past:", id_, name)
+                    continue
+
+                data.append({"id": id_, "name": name, "location": location,
+                    "image": image, "datetime": dt_start, "event_type": event_type})
 
 
 sorted_data = sorted(data, key=lambda x: x['datetime'])
