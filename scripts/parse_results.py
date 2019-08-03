@@ -14,6 +14,7 @@ import lib
 
 TIMEZONE = "Europe/Berlin"
 
+
 class EventType:
     def __init__(self, label, recurring=False):
         self.label = label
@@ -61,7 +62,6 @@ def parse_time(from_to, is_recurring=True):
         event_type = Unknown()
     
     return {"dt_start": dt_start, "event_type": event_type}
-
 
 
 def write_html_output(filename, output_data, all_rsvp={}):
@@ -124,8 +124,6 @@ def write_html_output(filename, output_data, all_rsvp={}):
         f.write("  </body>\n</html>\n")
 
     print("written", filename, flush=True)
-
-
 
 
 def write_index(filepath):
