@@ -2,7 +2,7 @@
 
 set -e
 
-source automate/helpers.sh
+. automate/helpers.sh
 
 export FILE_TAG=`TZ="Europe/Berlin" date +"%Y_%m_%d__%H_%M"`
 
