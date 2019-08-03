@@ -10,26 +10,24 @@ import facebook
 from credentials import access_token
 
 class EventType:
-    def __init__(self, label):
+    def __init__(self, label, recurring=False):
         self.label = label
+        if recurring:
+            self.label += ", recurring"
     def __str__(self):
         return self.label
     
 class Session(EventType):
-    def __init__(self):
-        super().__init__("Evening")
+    def __init__(self, recurring):
+        super().__init__("Short Event", recurring)
     
 class Workshop(EventType):
-    def __init__(self, hours):
-        super().__init__("{}-hour Workshop".format(hours))
+    def __init__(self, hours, recurring):
+        super().__init__("{}-hour Workshop".format(hours), recurring)
     
 class Retreat(EventType):
-    def __init__(self, days):
-        super().__init__("{}-day Retreat".format(days))
-    
-class Recurring(EventType):
-    def __init__(self):
-        super().__init__("Recurring")
+    def __init__(self, days, recurring):
+        super().__init__("{}-day Retreat".format(days), recurring)
     
 class Unknown(EventType):
     def __init__(self):
@@ -39,12 +37,8 @@ times = {}
 with open("all_event_times.txt", encoding="utf-8") as file:
     lines = file.read().strip("\n").split("\n")
     for line in lines:
-        id_, time_str, from_to, recurring_time = line.split("<")
-
-        # date
-        if not time_str:
-            continue
-        dt_date = datetime.datetime.strptime(time_str, "%A, %B %d, %Y")
+        id_, from_to, recurring = line.split("<")
+        is_recurring = bool(recurring)
 
         # time
         if " to " in from_to:
@@ -53,26 +47,19 @@ with open("all_event_times.txt", encoding="utf-8") as file:
             dt_from = dateutil.parser.parse(from_str).astimezone(tzlocal)
             dt_to = dateutil.parser.parse(to_str).astimezone(tzlocal)
 
-            if recurring_time:
-                dt_time = datetime.datetime.strptime(recurring_time, '%I:%M %p')
-                event_type = Recurring()
+            dt_start = dt_from
+
+            td = dt_to - dt_from
+            days, hours, seconds = td.days, td.seconds//3600, (td.seconds//60)%60
+            if days > 0:
+                event_type = Retreat(days + 1, is_recurring)
+            elif hours > 5:
+                event_type = Workshop(hours, is_recurring)
             else:
-                dt_time = dt_from
-
-                td = dt_to - dt_from
-                days, hours, seconds = td.days, td.seconds//3600, (td.seconds//60)%60
-                if days > 0:
-                    event_type = Retreat(days + 1)
-                elif hours > 5:
-                    event_type = Workshop(hours)
-                else:
-                    event_type = Session()
+                event_type = Session(is_recurring)
         else:
-            dt_time = dateutil.parser.parse(from_str).astimezone(tzlocal)
+            dt_start = dateutil.parser.parse(from_str).astimezone(tzlocal)
             event_type = Unknown()
-
-        # add time
-        dt_start = dt_date.replace(hour=dt_time.hour, minute=dt_time.minute)
         
 
         times[id_] = {"dt_start": dt_start, "event_type": event_type}
@@ -199,7 +186,7 @@ html_output("events_{}_berlin.html".format(suffix), berlin_workshops)
 
 # html evening
 evening_workshops = [info for info in sorted_data if 
-                     isinstance(info["event_type"], (Recurring, Session, Workshop)) and
+                     isinstance(info["event_type"], (Session, Workshop)) and
                      "berlin" in info["location"].lower() and info["datetime"].hour > 17]
 html_output("events_{}_evening.html".format(suffix), evening_workshops)
 

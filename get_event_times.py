@@ -47,26 +47,32 @@ elem.send_keys(Keys.RETURN)
 
 # get date
 
-def get_events_time(eid):
-    print(eid)
-    driver.get("https://www.facebook.com/events/" + eid)
-
-    time_str = driver.find_element_by_class_name("_5x8v").get_attribute("title")
+def parse_event_time(item):
     try:
         from_to = driver.find_element_by_class_name("_2ycp").get_attribute("content")
     except NoSuchElementException:
         from_to = ""
-    try:
-        recurring_first = driver.find_element_by_class_name("_2pir").text
-    except NoSuchElementException:
-        recurring_first = ""
+    return from_to
 
-    return time_str, from_to, recurring_first
+def get_event_time(eid):
+    print(eid)
+    driver.get("https://www.facebook.com/events/" + eid)
+
+    # check for time slots
+    slots = driver.find_elements_by_class_name("_3h4x")
+    if slots:
+        # open first event
+        href = slots[0].find_element_by_tag_name("a").get_attribute("href")
+        driver.get(href)
+        return parse_event_time(driver), "recurring"
+    else:
+        return parse_event_time(driver), ""
+
 
 event_times = {}
 for index, event_id in enumerate(event_ids, start=1):
     print("Fetching events {} of {}.".format(index, len(event_ids)), end=" ")
-    event_times[event_id] = get_events_time(event_id)
+    event_times[event_id] = get_event_time(event_id)
     print(event_id, event_times[event_id])
 
 
