@@ -8,14 +8,14 @@ setup_git() {
 }
 
 commit_website_files() {
+  git checkout master
   git add test.txt
   git commit --message "Travis build: $TRAVIS_BUILD_NUMBER"
-  git log
 }
 
 upload_files() {
   git remote add origin-push https://${GH_TOKEN}@github.com/christianbrugger/events.cbrugger.git > /dev/null 2>&1
-  git push --set-upstream origin-push master
+  git push --quiet --set-upstream origin-push master
 }
 
 setup_git
