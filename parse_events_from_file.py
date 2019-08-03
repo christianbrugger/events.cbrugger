@@ -9,11 +9,31 @@ import facebook
 
 from credentials import access_token
 
-TYPE_EVENING = "Evening"
-TYPE_WORKSHOP = "Workshop"
-TYPE_RETREAT = "Retreat"
-TYPE_RECURRING = "Recurring"
-TYPE_UNKNOWN = ""
+class EventType:
+    def __init__(self, label):
+        self.label = label
+    def __str__(self):
+        return self.label
+    
+class Evening(EventType):
+    def __init__(self):
+        super().__init__("Evening")
+    
+class Workshop(EventType):
+    def __init__(self, hours):
+        super().__init__("{}-hour Workshop".format(hours))
+    
+class Retreat(EventType):
+    def __init__(self, days):
+        super().__init__("{}-day Retreat".format(days))
+    
+class Recurring(EventType):
+    def __init__(self):
+        super().__init__("Recurring")
+    
+class Unknown(EventType):
+    def __init__(self):
+        super().__init__("")
 
 times = {}
 with open("all_event_times.txt", encoding="utf-8") as file:
@@ -35,21 +55,21 @@ with open("all_event_times.txt", encoding="utf-8") as file:
 
             if recurring_time:
                 dt_time = datetime.datetime.strptime(recurring_time, '%I:%M %p')
-                event_type = TYPE_RECURRING
+                event_type = Recurring()
             else:
                 dt_time = dt_from
 
                 td = dt_to - dt_from
                 days, hours, seconds = td.days, td.seconds//3600, (td.seconds//60)%60
                 if days > 0:
-                    event_type = TYPE_RETREAT
+                    event_type = Retreat(days + 1)
                 elif hours > 5:
-                    event_type = TYPE_WORKSHOP
+                    event_type = Workshop(hours)
                 else:
-                    event_type = TYPE_EVENING
+                    event_type = Evening()
         else:
             dt_time = dateutil.parser.parse(from_str).astimezone(tzlocal)
-            event_type = TYPE_UNKNOWN
+            event_type = Unknown()
 
         # add time
         dt_start = dt_date.replace(hour=dt_time.hour, minute=dt_time.minute)
@@ -168,10 +188,18 @@ def html_output(filename, output_data):
 
 
 suffix = datetime.datetime.now().strftime("%Y_%m_%d")
+
+# html all
 html_output("events_{}.html".format(suffix), sorted_data)
 
-evening_workshops = [info for info in sorted_data if info
-                     ["event_type"] in [TYPE_RECURRING, TYPE_EVENING, TYPE_WORKSHOP] and
+
+# html berlin
+berlin_workshops = [info for info in sorted_data if "berlin" in info["location"].lower()]
+html_output("events_{}_berlin.html".format(suffix), berlin_workshops)
+
+# html evening
+evening_workshops = [info for info in sorted_data if 
+                     isinstance(info["event_type"], (Recurring, Evening, Workshop)) and
                      "berlin" in info["location"].lower() and info["datetime"].hour > 17]
 html_output("events_{}_evening.html".format(suffix), evening_workshops)
 
