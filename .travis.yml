@@ -14,7 +14,7 @@ python:
     - '3.7'
  
 script:
-    - python travis/test_parser.py
+    - scripts/execute.sh
 
 after_success:
     - travis/push_results.sh
