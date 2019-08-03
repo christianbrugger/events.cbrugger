@@ -20,7 +20,11 @@ driver = webdriver.Chrome(options=options)
 driver.get("http://www.facebook.org")
 
 print("RESULT")
-print(driver.find_element_by_class_name("_58mv").text)
+result = driver.find_element_by_class_name("_58mv").text
+
+with open("test.txt", 'w', encoding="utf-8") as file:
+    file.write(result)
+print("written", result)
 
 driver.close()
 print("DONE")

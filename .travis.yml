@@ -14,4 +14,4 @@ python:
     - '3.7'
  
 script:
-    - python scripts/test_parser.py
+    - python travis/test_parser.py
