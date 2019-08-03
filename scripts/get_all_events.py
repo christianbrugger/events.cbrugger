@@ -46,11 +46,9 @@ def scroll_to_bottom():
 
 # create driver
 
-driver = webdriver.Chrome(options=options)
-
 options = Options()
 if IS_HEADLESS:
-    options.add_argument("--headless")  
+    options.add_argument("--headless")
     options.add_argument("--disable-gpu")
     options.add_argument('--no-sandbox')
 options.add_argument("--disable-notifications")
@@ -60,6 +58,8 @@ options.add_experimental_option('prefs', {
         'password_manager_enabled': False
     }
 })
+
+driver = webdriver.Chrome(options=options)
 
 # login
 
