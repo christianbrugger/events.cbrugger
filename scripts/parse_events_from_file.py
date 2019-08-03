@@ -36,9 +36,9 @@ class Unknown(EventType):
 # parse time
 
 def parse_time(from_to, is_recurring=True):
+    tzlocal = dateutil.tz.tzlocal()
     if " to " in from_to:
         from_str, to_str = from_to.split(" to ")
-        tzlocal = dateutil.tz.tzlocal()
         dt_from = dateutil.parser.parse(from_str).astimezone(tzlocal)
         dt_to = dateutil.parser.parse(to_str).astimezone(tzlocal)
 
@@ -53,7 +53,7 @@ def parse_time(from_to, is_recurring=True):
         else:
             event_type = Session(is_recurring)
     else:
-        dt_start = dateutil.parser.parse(from_str).astimezone(tzlocal)
+        dt_start = dateutil.parser.parse(from_to).astimezone(tzlocal)
         event_type = Unknown()
     
     return {"dt_start": dt_start, "event_type": event_type}
