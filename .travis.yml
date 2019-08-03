@@ -14,4 +14,4 @@ python:
     - '3.7'
  
 script:
-    - python test_parser.py
+    - python scripts/test_parser.py
