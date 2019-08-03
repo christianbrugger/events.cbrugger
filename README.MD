@@ -66,37 +66,49 @@ python -m pip install -r requirements.txt
 
 ### Python 3.5+
 
-The main interpreter.
+The main interpreter. Get the latest version.
 
 *tested with version 3.7.3 64bit*
 
 ### Dateutil
 
-Latest dateutil python package
+Used to parse dates and times. Get the latest version
+
+```
+python -m pip install python-dateutil
+```
 
 *tested with version 2.8.0*
 
 ### Facebook SDK
 
-If you want to use it, get the latest version
+Not used right now. If you want to use it, get the latest version
+
+```
+python -m pip install facebook-sdk
+```
 
 *tested with version 2019.6.16*
 
 ### Selenium for Python
 
+Used to drive chrome from python.
+
 ```
-pip install selenium
+python -m pip install selenium
 ```
 
 *tested with version 3.141.0*
 
 ### Chrome ###
 
-Latest Chrome browser
+Latest Chrome browser. Used to retrieve most of the information.
 
 *tested with 76.0.3809.87 (64-bit) on Windows 10*
 
 ### Chromedriver
+
+Used to control chrome programatically.
 
 A `chromedriver.exe` matching your Chrome version from
  
