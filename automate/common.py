@@ -9,15 +9,21 @@ import json
 N_GROUP_CHUNKS = 50
 N_TIMES_CHUNKS = 1
 
+# directories
+
 def project_path():
     return os.path.join(os.path.dirname(__file__), os.path.pardir)
+
 def to_abs(*paths):
     return os.path.join(project_path(), *paths)
+
 def to_basename(path):
     return os.path.splitext(path)[0].rstrip("0123456789")
 
 def to_uri(repo_name):
     return "https://github.com/christianbrugger/{}.git".format(repo_name)
+
+# run commands
 
 def run_secured(command, wd=project_path()):
     """ calls process and hides all outputs, usefull when operating on sensitive information """
@@ -41,6 +47,10 @@ def run_output(command, wd=project_path()):
         universal_newlines=True, stdout=subprocess.PIPE)
     return process.stdout
 
+# git
+    
+def clone(repo_name):
+    run("git clone {}".format(to_uri(repo_name)))
 
 def setup_git(wd=project_path()):
     run('git config --global user.email "travis@travis-ci.org"', wd)
@@ -64,6 +74,7 @@ def push(repo_name, wd=project_path()):
     
     print("Uploaded files successfully.")
 
+# parameters
 
 def extract_parameters():
     """ extract parameters from commit log """
@@ -77,8 +88,11 @@ def extract_parameters():
 
     return input_file, id_, file_tag
 
-def upload_file(filenames, repo_name, id_, file_tag):
-    run("git clone {}".format(to_uri(repo_name)))
+# file upload
+
+def upload_file(filenames, repo_name, id_, file_tag, do_clone=True):
+    if do_clone:
+        clone(repo_name)
     wd = to_abs(repo_name)
     setup_git(wd)
 
