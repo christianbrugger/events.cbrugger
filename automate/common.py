@@ -93,7 +93,8 @@ def upload_file(filenames, repo_name, id_, file_tag):
 
     # check if there are changes
     files_changed = bool(subprocess.run(
-        ['git', 'diff-index', '--quiet', 'HEAD', '--']).returncode)
+        ['git', 'diff-index', '--quiet', 'HEAD', '--'], 
+        cwd=wd).returncode)
 
     # commit result
     if files_changed:
