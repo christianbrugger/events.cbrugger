@@ -61,7 +61,7 @@ def parse_time(from_to, is_recurring=True):
         dt_start = dateutil.parser.parse(from_to).astimezone(tz)
         event_type = Unknown()
     
-    return {"dt_start": dt_start, "event_type": event_type}
+    return dt_start, event_type
 
 
 def write_html_output(filename, output_data, all_rsvp={}):
@@ -161,57 +161,34 @@ def get_rsvp():
     return all_rsvp
 
 
-def parse_results(merged_basename, times_basename, input_chunks):
-
-    # import times
-
-    times = {}
-    try:
-        for i in range(input_chunks):
-            filename = "{}{}.txt".format(times_basename, i)
-            print("Opening file", filename)
-
-            with open(filename) as file:
-                times.update(json.load(file))
-            
-            
-    except FileNotFoundError:
-        print("ERROR: One or more files not available. Quitting")
-        return
+def parse_results(basename, input_chunks):
 
     # import event data
 
     data = []
     try:
         for i in range(input_chunks):
-            filename = "{}{}.txt".format(merged_basename, i)
+            filename = "{}{}.txt".format(basename, i)
             print("Opening file", filename)
 
             with open(filename) as file:
                 new_data = json.load(file)
 
             for id_ in new_data:
-                try:
-                    event_times = times[id_]["times"]
-                    recurring = times[id_]["recurring"]
-                except KeyError:
-                    print("Event without time information:", id_, new_data[id_]["name"])
-                    continue
-                else:
-                    for from_to in event_times:
-                        event_time = parse_time(from_to, recurring)
+                event_times = new_data[id_]["times"]
+                recurring = new_data[id_]["recurring"]
 
-                        dt_start = event_time["dt_start"]
-                        event_type = event_time["event_type"]
-                        
-                        if dt_start.date() < datetime.datetime.now().date():
-                            print("Skipping event, event is in the past:", id_, name)
-                            continue
+                for from_to in event_times:
+                    dt_start, event_type = parse_time(from_to, recurring)
+                    
+                    if dt_start.date() < datetime.datetime.now().date():
+                        print("Skipping event, event is in the past:", id_, name)
+                        continue
 
-                        data_copy = new_data[id_].copy()
-                        data_copy.update({"id": id_, "datetime": dt_start, "event_type": event_type})
-                        data.append(data_copy)
-            
+                    data_copy = new_data[id_].copy()
+                    data_copy.update({"id": id_, "datetime": dt_start, "event_type": event_type})
+                    data.append(data_copy)
+
     except FileNotFoundError:
         print("ERROR: One or more files not available. Quitting")
         return
@@ -247,19 +224,17 @@ def parse_results(merged_basename, times_basename, input_chunks):
 
 def get_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument("merged_basename", type=str, help="beginning of filename with merged event data, excluding id and extension")
-    parser.add_argument("times_basename", type=str, help="beginning of filename with time data, excluding id and extension")
+    parser.add_argument("basename", type=str, help="beginning of filename with time data, excluding id and extension")
     parser.add_argument("--chunks", type=int, help="number of input files", default=1)
     args = parser.parse_args()
-    print("merged_basename: {}".format(args.merged_basename))
-    print("times_basename: {}".format(args.times_basename))
+    print("basename: {}".format(args.basename))
     print("chunks: {}".format(args.chunks))
     return args
 
 
 def main():
     args = get_args()
-    parse_results(args.merged_basename, args.times_basename, args.chunks)
+    parse_results(args.basename, args.chunks)
 
 
 if __name__ == "__main__":

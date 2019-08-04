@@ -3,9 +3,12 @@ scripts/credentials.py
 chromedriver.exe
 chromedriver
 
-all_event_ids*.txt
-all_event_times*.txt
-events.txt
+*groups*.txt
+*events*.txt
+*merged*.txt
+*times*.txt
+*events*.html
+index.html
 
 env/
 

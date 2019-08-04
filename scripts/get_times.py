@@ -42,9 +42,9 @@ def get_event_time(driver, eid):
 def get_all_times(input_filename, id_="", headless=False):
     # read event ids
     with open(input_filename) as file:
-        event_ids = json.load(file)
+        event_data = json.load(file)
 
-    print("Imported {} events.".format(len(event_ids)), flush=True)
+    print("Imported {} events.".format(len(event_data)), flush=True)
 
     # login facebook
     driver = lib.create_driver(headless)
@@ -53,20 +53,20 @@ def get_all_times(input_filename, id_="", headless=False):
 
     # get times
 
-    event_times = {}
-    for index, event_id in enumerate(event_ids, start=1):
-        print("Fetching events {} of {} ({})".format(index, len(event_ids), event_id), flush=True)
-        event_times[event_id] = get_event_time(driver, event_id)
-        print(event_id, event_times[event_id], flush=True)
+    for index, event_id in enumerate(event_data, start=1):
+        print("Fetching events {} of {} ({})".format(index, len(event_data), event_id), flush=True)
+        result = get_event_time(driver, event_id)
+        print(event_id, result, flush=True)
+        event_data[event_id].update(result)
 
-    print("Processed {} events.".format(len(event_ids)), flush=True)
+    print("Processed {} events.".format(len(event_data)), flush=True)
 
     # store results
 
     filename = lib.tagged_filename("times{}.txt".format(id_))
 
     with open(filename, 'w') as file:
-        json.dump(event_times, file, indent=4, sort_keys=True)
+        json.dump(event_data, file, indent=4, sort_keys=True)
 
     print("written", filename, flush=True)
 
