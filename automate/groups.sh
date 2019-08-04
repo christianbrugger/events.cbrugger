@@ -6,7 +6,7 @@ set -e
 export FILE_TAG=`TZ="Europe/Berlin" date +"%Y_%m_%d__%H_%M"`
 
 # install requirements
-python -m pip -r requirements.txt
+python -m pip install -r requirements.txt
 
 # run script
 python scripts/get_groups.py --headless --chunks=50
