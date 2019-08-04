@@ -23,7 +23,7 @@ def run_parse():
     # push results to next repository
     filenames = [path for path in os.listdir(common.project_path()) if path.endswith(".html")]
     
-    common.upload_file(filenames, repo_name, id_, file_tag)
+    common.upload_file(filenames, repo_name, id_, file_tag, do_clone=False)
 
     print("Parse done")
 
