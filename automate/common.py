@@ -7,7 +7,7 @@ import shutil
 import json
 
 N_GROUP_CHUNKS = 50
-N_MERGE_CHUNKS = 1
+N_TIMES_CHUNKS = 1
 
 def project_path():
     return os.path.join(os.path.dirname(__file__), os.path.pardir)
@@ -77,20 +77,25 @@ def extract_parameters():
 
     return input_file, id_, file_tag
 
-def upload_file(filename, repo_name, id_, file_tag):
+def upload_file(filenames, repo_name, id_, file_tag):
     run("git clone {}".format(to_uri(repo_name)))
-
-    shutil.move(to_abs(filename), to_abs(repo_name, "inputs", filename))
-    message = json.dumps({"input": filename, "id": id_, "tag": file_tag})
-
     wd = to_abs(repo_name)
     setup_git(wd)
-    run(['git', 'add', 'inputs/' + filename], wd)
+
+    if isinstance(filename, str):
+        filenames = [filenames]
+
+    # add all files
+    for filename in filenames:
+        shutil.move(to_abs(filename), to_abs(repo_name, "inputs", filename))
+        message = json.dumps({"input": filename, "id": id_, "tag": file_tag})
+        run(['git', 'add', 'inputs/' + filename], wd)
 
     # check if there are changes
     files_changed = bool(subprocess.run(
         ['git', 'diff-index', '--quiet', 'HEAD', '--']).returncode)
 
+    # commit result
     if files_changed:
         run(['git', 'commit', '--message', message], wd)
         push(repo_name, wd)

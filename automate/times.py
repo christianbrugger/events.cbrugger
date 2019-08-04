@@ -2,7 +2,7 @@
 import common
 
 def run_times():
-    # extrat parameters
+    # extract parameters
     input_file, id_, file_tag = common.extract_parameters()
 
     # run script

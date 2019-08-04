@@ -2,13 +2,13 @@
 import common
 
 def run_merge():
-    # extrat parameters
+    # extract parameters
     input_file, id_, file_tag = common.extract_parameters()
 
     # run script
     common.run(['python', 'scripts/merge_events.py', 
         '--input_chunks', str(1), 
-        '--output_chunks', str(common.N_MERGE_CHUNKS), 
+        '--output_chunks', str(common.N_TIMES_CHUNKS), 
         common.to_basename(input_file)])
 
     # push results to next repository
