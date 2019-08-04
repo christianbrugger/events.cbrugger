@@ -58,18 +58,24 @@ def create_driver(headless=False):
     return driver
 
 def login_facebook(driver):
-    driver.get("http://www.facebook.org")
-    assert "Facebook" in driver.title
-    elem = driver.find_element_by_id("email")
-    elem.send_keys(username)
-    elem = driver.find_element_by_id("pass")
-    elem.send_keys(password)
-    elem.send_keys(Keys.RETURN)
+    success = False
+    
+    while not success:
+        driver.get("http://www.facebook.org")
+        assert "Facebook" in driver.title
+        elem = driver.find_element_by_id("email")
+        elem.send_keys(username)
+        elem = driver.find_element_by_id("pass")
+        elem.send_keys(password)
+        elem.send_keys(Keys.RETURN)
 
-    # verify login
-    composer_text = driver.find_element_by_id("pagelet_composer").text
-    assert "Create Post" in composer_text
-    assert "What's on your mind" in composer_text
+        # verify login
+        composer_text = driver.find_element_by_id("pagelet_composer").text
+        success = "Create Post" in composer_text and "What's on your mind" in composer_text
+
+        if not success:
+            print("WARNING: Login was not successfull. Retry in 60 seconds.", flush=True)
+            time.sleep(60)
 
     print("Login completed", flush=True)
 
