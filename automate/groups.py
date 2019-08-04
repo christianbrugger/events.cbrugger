@@ -2,6 +2,7 @@
 import datetime
 import os
 import shutil
+import json
 
 import dateutil.tz
 
@@ -16,9 +17,6 @@ def run_groups():
     file_tag = now.strftime("%Y.%m.%d_%H-%M")
     os.environ["FILE_TAG"] = file_tag
 
-    # install dependencies
-    common.run("python -m pip install -r requirements.txt")
-
     # run script
     common.run("python scripts/get_groups.py --headless --chunks {}"
         .format(common.N_GROUP_CHUNKS))
@@ -30,11 +28,12 @@ def run_groups():
         
         common.run("git clone {}".format(common.to_uri(repo_name)))
         shutil.move(common.to_abs(filename), common.to_abs(repo_name, "inputs", filename))
+        message = json.dumps({"input": filename, "id": id_})
 
         wd = common.to_abs(repo_name)
         common.setup_git(wd)
-        common.run("git add inputs/{}".format(filename), wd)
-        common.run('git commit --message "{}"'.format(filename), wd)
+        common.run(['git', 'add', 'inputs/' + filename], wd)
+        common.run(['git', 'commit' '--message', message], wd)
 
         common.upload_files(repo_name, wd)
 

@@ -16,14 +16,18 @@ def to_uri(repo_name):
 
 def run_secured(command, wd=project_path()):
     """ calls process and hides all outputs, usefull when operating on sensitive information """
+    if isinstance(command, str):
+        command = shlex.split(command)
     # do not use check=True, as it leaks secret information in tracebacks
-    process = subprocess.run(shlex.split(command), cwd=wd, 
+    process = subprocess.run(command, cwd=wd, 
         stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     if process.returncode != 0:
         raise RuntimeError("command failed")
 
 def run(command, wd=project_path()):
-    subprocess.run(shlex.split(command), check=True, cwd=wd)
+    if isinstance(command, str):
+        command = shlex.split(command)
+    subprocess.run(common, check=True, cwd=wd)
 
 
 def setup_git(wd=project_path()):
