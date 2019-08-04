@@ -66,6 +66,11 @@ def login_facebook(driver):
     elem.send_keys(password)
     elem.send_keys(Keys.RETURN)
 
+    # verify login
+    composer_text = driver.find_element_by_id("pagelet_composer").text
+    assert "Create Post" in composer_text
+    assert "What's on your mind" in composer_text
+
     print("Login completed", flush=True)
 
 
