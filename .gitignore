@@ -8,6 +8,5 @@ all_event_times*.txt
 events.txt
 
 env/
-.vscode
 
 __pycache__

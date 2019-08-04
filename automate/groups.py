@@ -26,16 +26,7 @@ def run_groups():
         repo_name = "events.cbrugger.events{}".format(id_)
         filename = "{}_groups{}.txt".format(file_tag, id_)
         
-        common.run("git clone {}".format(common.to_uri(repo_name)))
-        shutil.move(common.to_abs(filename), common.to_abs(repo_name, "inputs", filename))
-        message = json.dumps({"input": filename, "id": id_, "tag": file_tag})
-
-        wd = common.to_abs(repo_name)
-        common.setup_git(wd)
-        common.run(['git', 'add', 'inputs/' + filename], wd)
-        common.run(['git', 'commit', '--message', message], wd)
-
-        common.upload_files(repo_name, wd)
+        common.upload_file(filename, repo_name, id_, file_tag)
 
     print("Groups done")
 
