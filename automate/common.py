@@ -7,6 +7,7 @@ import shutil
 import json
 
 N_GROUP_CHUNKS = 50
+N_MERGE_CHUNKS = 1
 
 def project_path():
     return os.path.join(os.path.dirname(__file__), os.path.pardir)
