@@ -6,8 +6,8 @@ import time
 import shutil
 import json
 
-N_GROUP_CHUNKS = 50
-N_TIMES_CHUNKS = 1
+N_GROUP_CHUNKS = 2
+N_EVENT_CHUNKS = 2
 
 EXIT_FILE_MISSING = 66
 

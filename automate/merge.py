@@ -8,8 +8,8 @@ def run_merge():
     # run script
     returncode = common.run_returncode([
         'python', 'scripts/merge_events.py', 
-        '--input_chunks', str(1), 
-        '--output_chunks', str(common.N_TIMES_CHUNKS), 
+        '--input_chunks', str(common.N_GROUP_CHUNKS), 
+        '--output_chunks', str(common.N_EVENT_CHUNKS), 
         common.to_basename(input_file)])
 
     # check return code
@@ -20,7 +20,7 @@ def run_merge():
         raise RuntimeError("Error while calling script")
 
     # push results to next repository
-    for id_ in range(1):
+    for id_ in range(common.N_EVENT_CHUNKS):
         repo_name = "events.cbrugger.times{}".format(id_)
         filename = "{}_merged{}.txt".format(file_tag, id_)
         

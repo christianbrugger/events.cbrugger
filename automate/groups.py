@@ -17,10 +17,10 @@ def run_groups():
 
     # run script
     common.run("python scripts/get_groups.py --headless --chunks {}"
-        .format(common.N_GROUP_CHUNKS))
+        .format(50)) # TODO: use common.N_GROUP_CHUNKS
 
     # push results to next repository
-    for id_ in range(1):
+    for id_ in range(common.N_GROUP_CHUNKS):
         repo_name = "events.cbrugger.events{}".format(id_)
         filename = "{}_groups{}.txt".format(file_tag, id_)
         

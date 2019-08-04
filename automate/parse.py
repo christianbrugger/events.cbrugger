@@ -18,7 +18,7 @@ def run_parse():
     # run script
     returncode = common.run_returncode([
         'python', 'scripts/parse_results.py', 
-        '--chunks', str(common.N_TIMES_CHUNKS), 
+        '--chunks', str(common.N_EVENT_CHUNKS), 
         common.to_basename(input_file)])
 
     # check return code
