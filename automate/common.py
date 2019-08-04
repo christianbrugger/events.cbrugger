@@ -27,7 +27,7 @@ def run_secured(command, wd=project_path()):
 def run(command, wd=project_path()):
     if isinstance(command, str):
         command = shlex.split(command)
-    subprocess.run(common, check=True, cwd=wd)
+    subprocess.run(command, check=True, cwd=wd)
 
 
 def setup_git(wd=project_path()):
