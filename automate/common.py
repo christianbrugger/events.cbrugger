@@ -86,6 +86,13 @@ def upload_file(filename, repo_name, id_, file_tag):
     wd = to_abs(repo_name)
     setup_git(wd)
     run(['git', 'add', 'inputs/' + filename], wd)
-    run(['git', 'commit', '--message', message], wd)
 
-    push(repo_name, wd)
+    # check if there are changes
+    files_changed = bool(subprocess.run(
+        ['git', 'diff-index', '--quiet', 'HEAD', '--']).returncode)
+
+    if files_changed:
+        run(['git', 'commit', '--message', message], wd)
+        push(repo_name, wd)
+    else:
+        print("INFO: nothing to commit")
