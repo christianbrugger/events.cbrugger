@@ -20,7 +20,7 @@ def run_events():
 
     # push results to next repository
     for id_ in range(1):
-        repo_name = "events.cbrugger.events{}".format(id_)
+        repo_name = "events.cbrugger.merge{}".format(id_)
         filename = "{}_events{}.txt".format(file_tag, id_)
         
         common.upload_file(filename, repo_name, id_, file_tag)
