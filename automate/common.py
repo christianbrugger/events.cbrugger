@@ -82,7 +82,7 @@ def upload_file(filenames, repo_name, id_, file_tag):
     wd = to_abs(repo_name)
     setup_git(wd)
 
-    if isinstance(filename, str):
+    if isinstance(filenames, str):
         filenames = [filenames]
 
     # add all files

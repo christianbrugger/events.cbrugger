@@ -13,7 +13,7 @@ def run_parse():
         common.to_basename(input_file)])
 
     # push results to next repository
-    repo_name = "events.cbrugger.times{}".format(id_)
+    repo_name = "events.cbrugger.results"
     filenames = [path for path in os.listdir(common.project_path()) if path.endswith(".html")]
     
     common.upload_file(filenames, repo_name, id_, file_tag)
