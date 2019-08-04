@@ -183,7 +183,7 @@ def parse_results(basename, input_chunks):
                     dt_start, event_type = parse_time(from_to, recurring)
                     
                     if dt_start.date() < datetime.datetime.now().date():
-                        print("Skipping event, event is in the past:", id_, name)
+                        print("Skipping event, event is in the past:", id_, new_data[id_]["name"])
                         continue
 
                     data_copy = new_data[id_].copy()
