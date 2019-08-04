@@ -17,7 +17,7 @@ def run_groups():
 
     # run script
     common.run("python scripts/get_groups.py --headless --chunks {}"
-        .format(50)) # TODO: use common.N_GROUP_CHUNKS
+        .format(common.N_GROUP_CHUNKS))
 
     # push results to next repository
     for id_ in range(common.N_GROUP_CHUNKS):
