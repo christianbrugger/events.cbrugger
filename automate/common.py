@@ -13,6 +13,8 @@ def project_path():
     return os.path.join(os.path.dirname(__file__), os.path.pardir)
 def to_abs(*paths):
     return os.path.join(project_path(), *paths)
+def to_basename(path):
+    return os.path.splitext(path)[0].rstrip("0123456789")
 
 def to_uri(repo_name):
     return "https://github.com/christianbrugger/{}.git".format(repo_name)

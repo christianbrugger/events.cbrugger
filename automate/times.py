@@ -1,7 +1,7 @@
 
 import common
 
-def run_events():
+def run_times():
     # extrat parameters
     input_file, id_, file_tag = common.extract_parameters()
 
@@ -14,7 +14,7 @@ def run_events():
     
     common.upload_file(filename, repo_name, id_, file_tag)
 
-    print("Events done")
+    print("Times done")
 
 if __name__ == "__main__":
-    run_events()
+    run_times()
