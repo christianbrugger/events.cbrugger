@@ -6,8 +6,8 @@ import time
 import shutil
 import json
 
-N_GROUP_CHUNKS = 2
-N_EVENT_CHUNKS = 2
+N_GROUP_CHUNKS = 4
+N_EVENT_CHUNKS = 4
 
 EXIT_FILE_MISSING = 66
 
@@ -80,7 +80,7 @@ def push(repo_name, wd=project_path()):
         else:
             break
     
-    print("Uploaded files successfully.")
+    print("Uploaded files successfully to {}.".format(repo_name))
 
 # parameters
 
