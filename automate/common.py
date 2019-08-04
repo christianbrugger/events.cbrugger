@@ -61,6 +61,19 @@ def push(repo_name, wd=project_path()):
     
     print("Uploaded files successfully.")
 
+
+def extract_parameters():
+    """ extract parameters from commit log """
+    message = run_output("git log -1 --pretty=%B", to_abs("..")).strip()
+    data = json.loads(message)
+
+    input_file = to_abs("..", "inputs", data["input"])
+    id_ = data["id"]
+    file_tag = data["tag"]
+    os.environ["FILE_TAG"] = file_tag
+
+    return input_file, id_, file_tag
+
 def upload_file(filename, repo_name, id_, file_tag):
     run("git clone {}".format(to_uri(repo_name)))
 
