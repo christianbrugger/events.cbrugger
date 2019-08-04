@@ -33,7 +33,7 @@ def run_groups():
         wd = common.to_abs(repo_name)
         common.setup_git(wd)
         common.run(['git', 'add', 'inputs/' + filename], wd)
-        common.run(['git', 'commit' '--message', message], wd)
+        common.run(['git', 'commit', '--message', message], wd)
 
         common.upload_files(repo_name, wd)
 
