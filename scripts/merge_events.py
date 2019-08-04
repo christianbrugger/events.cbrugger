@@ -19,7 +19,7 @@ def merge_events(input_basename, input_chunks, output_chunks):
                 events = json.load(file)
             all_events.update(events)
     except FileNotFoundError:
-        print("ERROR: One or more files not available. Quitting")
+        print("INFO: One or more files not available. Quitting")
         return
 
     print("Imported {} events.".format(len(all_events)))

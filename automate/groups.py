@@ -1,8 +1,6 @@
 
 import datetime
 import os
-import shutil
-import json
 
 import dateutil.tz
 
