@@ -9,6 +9,8 @@ import json
 N_GROUP_CHUNKS = 50
 N_TIMES_CHUNKS = 1
 
+EXIT_FILE_MISSING = 66
+
 # directories
 
 def project_path():
@@ -46,6 +48,12 @@ def run_output(command, wd=project_path()):
     process = subprocess.run(command, check=True, cwd=wd,
         universal_newlines=True, stdout=subprocess.PIPE)
     return process.stdout
+
+def run_returncode(command, wd=project_path()):
+    if isinstance(command, str):
+        command = shlex.split(command)
+    process = subprocess.run(command, cwd=wd)
+    return process.returncode
 
 # git
     
@@ -106,9 +114,7 @@ def upload_file(filenames, repo_name, id_, file_tag, do_clone=True):
         run(['git', 'add', 'inputs/' + filename], wd)
 
     # check if there are changes
-    files_changed = bool(subprocess.run(
-        ['git', 'diff-index', '--quiet', 'HEAD', '--'], 
-        cwd=wd).returncode)
+    files_changed = bool(run_returncode(['git', 'diff-index', '--quiet', 'HEAD', '--'], wd))
 
     # commit result
     if files_changed:

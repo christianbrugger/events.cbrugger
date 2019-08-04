@@ -19,6 +19,7 @@ FILE_TAG = os.environ.get("FILE_TAG", None)
 
 SCROLL_PAUSE_TIME = 3.0 # seconds
 
+EXIT_FILE_MISSING = 66
 
 def scroll_to_bottom(driver, scroll_pause_time=SCROLL_PAUSE_TIME):
     # Get scroll height

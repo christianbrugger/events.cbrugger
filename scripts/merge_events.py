@@ -1,6 +1,7 @@
 import re
 import argparse
 import json
+import sys
 
 import lib
 
@@ -20,7 +21,7 @@ def merge_events(input_basename, input_chunks, output_chunks):
             all_events.update(events)
     except FileNotFoundError:
         print("INFO: One or more files not available. Quitting")
-        return
+        sys.exit(lib.EXIT_FILE_MISSING)
 
     print("Imported {} events.".format(len(all_events)))
 

@@ -4,6 +4,7 @@ import datetime
 import os
 import argparse
 import json
+import sys
 
 import dateutil.parser
 import dateutil.tz
@@ -190,8 +191,8 @@ def parse_results(basename, input_chunks):
                     data.append(data_copy)
 
     except FileNotFoundError:
-        print("ERROR: One or more files not available. Quitting")
-        return
+        print("INFO: One or more files not available. Quitting")
+        sys.exit(lib.EXIT_FILE_MISSING)
 
     # sort data
 

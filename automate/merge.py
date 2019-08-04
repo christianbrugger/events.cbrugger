@@ -6,10 +6,18 @@ def run_merge():
     input_file, id_, file_tag = common.extract_parameters()
 
     # run script
-    common.run(['python', 'scripts/merge_events.py', 
+    returncode = common.run_returncode([
+        'python', 'scripts/merge_events.py', 
         '--input_chunks', str(1), 
         '--output_chunks', str(common.N_TIMES_CHUNKS), 
         common.to_basename(input_file)])
+
+    # check return code
+    if returncode == common.EXIT_FILE_MISSING:
+        print("INFO: file missing, exiting gracefully")
+        return
+    elif returncode != 0:
+        raise RuntimeError("Error while calling script")
 
     # push results to next repository
     for id_ in range(1):
