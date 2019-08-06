@@ -6,6 +6,7 @@ import time
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.keys import Keys
+from selenium.common.exceptions import NoSuchElementException
 
 try:
     from credentials import username
@@ -70,8 +71,11 @@ def login_facebook(driver):
         elem.send_keys(Keys.RETURN)
 
         # verify login
-        composer_text = driver.find_element_by_id("pagelet_composer").text
-        success = "Create Post" in composer_text and "What's on your mind" in composer_text
+        try:
+            composer_text = driver.find_element_by_id("pagelet_composer").text
+            success = "Create Post" in composer_text and "What's on your mind" in composer_text
+        except NoSuchElementException:
+            pass
 
         if not success:
             print("WARNING: Login was not successfull. Retry in 60 seconds.", flush=True)
