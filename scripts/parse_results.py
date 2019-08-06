@@ -140,7 +140,7 @@ def write_index(filepath):
         <body>\n
         """)
 
-        for filename in sorted(os.listdir(".")):
+        for filename in sorted(os.listdir("."), reverse=True):
             if filename.endswith(".html") and filename != filepath:
                 f.write('<h1><a class="" href="{}">{}</a></h1>\n'.format(
                     filename, os.path.splitext(filename)[0]))
