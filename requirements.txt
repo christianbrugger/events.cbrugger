@@ -1,7 +1,6 @@
 
 # selenium
-selenium==3.141.0
-urllib3==1.25.3
+selenium
 
 # # facebook-sdk
 # certifi==2019.6.16

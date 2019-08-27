@@ -210,13 +210,20 @@ def parse_results(basename, input_chunks):
     write_html_output(T("events.html"), sorted_data)
 
     # berlin
-    berlin_workshops = [info for info in sorted_data if "berlin" in info["location"].lower()]
+    berlin_workshops = [info for info in sorted_data if 
+                        "berlin" in info["location"].lower() and 
+                        "yoga" not in info["name"].lower() and
+                        "acro" not in info["name"].lower() and
+                        "vinyasa" not in info["name"].lower()]
     write_html_output(T("events_berlin.html"), berlin_workshops)
 
     # eveing
     evening_workshops = [info for info in sorted_data if 
                         isinstance(info["event_type"], (Session, Workshop)) and
-                        "berlin" in info["location"].lower() and info["datetime"].hour > 17]
+                        "berlin" in info["location"].lower() and info["datetime"].hour > 17 and
+                        "yoga" not in info["name"].lower() and
+                        "acro" not in info["name"].lower() and
+                        "vinyasa" not in info["name"].lower()]
     write_html_output(T("events_evenings.html"), evening_workshops)
 
     # index
