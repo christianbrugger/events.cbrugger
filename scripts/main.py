@@ -29,7 +29,7 @@ def main():
     db = model.Database(args.database)
 
     if not args.results_only:
-        print("\nFacebook login:")
+        print("\nFacebook login:", end="")
         driver = lib.create_driver(not args.no_headless)
         try:
             lib.login_facebook(driver)

@@ -7,8 +7,7 @@ chromedriver
 *events*.txt
 *merged*.txt
 *times*.txt
-#*events*.html
-#index.html
+events.db
 
 env/
 
