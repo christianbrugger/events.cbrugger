@@ -5,13 +5,13 @@ import os
 import argparse
 import json
 import sys
+import collections
 
 import dateutil.parser
 import dateutil.tz
-#import facebook
 
 import lib
-#from credentials import access_token
+from model import Database, Group, Event, EventTime
 
 TIMEZONE = "Europe/Berlin"
 
@@ -41,17 +41,10 @@ class Unknown(EventType):
         super().__init__("")
 
 
-def parse_time(from_to, is_recurring=True):
-    tz = dateutil.tz.gettz(TIMEZONE)
-    if " to " in from_to:
-        from_str, to_str = from_to.split(" to ")
-        dt_from = dateutil.parser.parse(from_str).astimezone(tz)
-        dt_to = dateutil.parser.parse(to_str).astimezone(tz)
-
-        dt_start = dt_from
-
-        td = dt_to - dt_from
-        days, hours, seconds = td.days, td.seconds//3600, (td.seconds//60)%60
+def get_event_type(time_delta, is_recurring=True):
+    """ time_delta in hours """
+    if time_delta >= 0:
+        days, hours = time_delta // 24, time_delta
         if days > 0:
             event_type = Retreat(days + 1, is_recurring)
         elif hours > 5:
@@ -59,10 +52,9 @@ def parse_time(from_to, is_recurring=True):
         else:
             event_type = Session(is_recurring)
     else:
-        dt_start = dateutil.parser.parse(from_to).astimezone(tz)
         event_type = Unknown()
     
-    return dt_start, event_type
+    return event_type
 
 
 def write_html_output(filename, output_data, all_rsvp={}):
@@ -81,15 +73,15 @@ def write_html_output(filename, output_data, all_rsvp={}):
         
         last_day = None
         for info in output_data:
-            day = info["datetime"].date()
+            day = info.start_time.date()
             if day != last_day:
                 last_day = day
                 f.write("<h2>" + day.strftime("%A, %B %d, %Y") + "</h2>\n")
 
-            place_str = info["location"]
+            place_str = info.location
 
             rsvp_str = ""
-            if info["id"] in all_rsvp:
+            if info.event_id in all_rsvp:
                 rsvp_str = all_rsvp[info["id"]]
 
             # table with entries
@@ -114,13 +106,13 @@ def write_html_output(filename, output_data, all_rsvp={}):
                 </table>
                 </li>
                 </ul>
-            """.format(img_url=info["image"],
-                    event_url='https://www.facebook.com/events/' + info["id"],
-                    event_name=info["name"],
-                    time=info["datetime"].strftime("%H:%M").lstrip('0'), #%I:%M %p
+            """.format(img_url=info.image,
+                    event_url='https://www.facebook.com/events/' + info.event_id,
+                    event_name=info.name,
+                    time=info.start_time.strftime("%H:%M").lstrip('0'), #%I:%M %p
                     place=place_str,
                     rsvp=rsvp_str,
-                    event_type=info["event_type"]))
+                    event_type=info.event_type))
         
         f.write("  </body>\n</html>\n")
 
@@ -151,7 +143,6 @@ def write_index(filepath):
 
 
 def get_rsvp():
-
     # get my event responses
     graph = facebook.GraphAPI(access_token, version='2.8')
 
@@ -162,47 +153,33 @@ def get_rsvp():
     return all_rsvp
 
 
-def parse_results(basename, input_chunks):
+ParsedEvent = collections.namedtuple("ParseEvent",
+        ["event_id", "name", "location", "image", "recurring", "start_time", "event_type"])
 
+def parse_results():
+    tz = dateutil.tz.gettz(TIMEZONE)
+    
     # import event data
+    parsed_events = []
+    for event_time in EventTime.select():
+        event = event_time.event
 
-    data = []
-    try:
-        for i in range(input_chunks):
-            filename = "{}{}.txt".format(basename, i)
-            print("Opening file", filename)
+        event_type = get_event_type(event_time.time_delta, event.recurring)
+        start_time = event_time.time_from.replace(tzinfo=datetime.timezone.utc).astimezone(tz)
 
-            with open(filename) as file:
-                new_data = json.load(file)
-
-            for id_ in new_data:
-                event_times = new_data[id_]["times"]
-                recurring = new_data[id_]["recurring"]
-
-                for from_to in event_times:
-                    dt_start, event_type = parse_time(from_to, recurring)
-                    
-                    if dt_start.date() < datetime.datetime.now().date():
-                        print("Skipping event, event is in the past:", id_, new_data[id_]["name"])
-                        continue
-
-                    data_copy = new_data[id_].copy()
-                    data_copy.update({"id": id_, "datetime": dt_start, "event_type": event_type})
-                    data.append(data_copy)
-
-    except FileNotFoundError:
-        print("INFO: One or more files not available. Quitting")
-        sys.exit(lib.EXIT_FILE_MISSING)
+        parsed_event = ParsedEvent(event.id, event.name, event.location, event.image, 
+                event.recurring, event_time.time_from.astimezone(tz), event_type)
+        
+        if start_time.date() < datetime.datetime.now().date():
+            print("Skipping event, event is in the past:", parsed_event.name)
+        else:
+            parsed_events.append(parsed_event)
 
     # sort data
-
-    sorted_data = sorted(data, key=lambda x: x['datetime'])
-
+    sorted_data = sorted(parsed_events, key=lambda x: x.start_time)
     print("Imported {} events.".format(len(sorted_data)), flush=True)
 
-
-    # write html files
-
+    # write html files    
     default_tag = datetime.datetime.now().strftime("%Y_%m_%d__%H_%M")
     T = lambda name: lib.tagged_filename(name, default_tag)
 
@@ -211,19 +188,19 @@ def parse_results(basename, input_chunks):
 
     # berlin
     berlin_workshops = [info for info in sorted_data if 
-                        "berlin" in info["location"].lower() and 
-                        "yoga" not in info["name"].lower() and
-                        "acro" not in info["name"].lower() and
-                        "vinyasa" not in info["name"].lower()]
+                        "berlin" in info.location.lower() and 
+                        "yoga" not in info.name.lower() and
+                        "acro" not in info.name.lower() and
+                        "vinyasa" not in info.name.lower()]
     write_html_output(T("events_berlin.html"), berlin_workshops)
 
     # eveing
     evening_workshops = [info for info in sorted_data if 
-                        isinstance(info["event_type"], (Session, Workshop)) and
-                        "berlin" in info["location"].lower() and info["datetime"].hour > 17 and
-                        "yoga" not in info["name"].lower() and
-                        "acro" not in info["name"].lower() and
-                        "vinyasa" not in info["name"].lower()]
+                        isinstance(info.event_type, (Session, Workshop)) and
+                        "berlin" in info.location.lower() and info.start_time.hour > 17 and
+                        "yoga" not in info.name.lower() and
+                        "acro" not in info.name.lower() and
+                        "vinyasa" not in info.name.lower()]
     write_html_output(T("events_evenings.html"), evening_workshops)
 
     # index
@@ -232,17 +209,17 @@ def parse_results(basename, input_chunks):
 
 def get_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument("basename", type=str, help="beginning of filename with time data, excluding id and extension")
-    parser.add_argument("--chunks", type=int, help="number of input files", default=1)
+    parser.add_argument("--database", "-d", default="events.db", type=str,
+                        help="database file (default: events.db)")
     args = parser.parse_args()
-    print("basename: {}".format(args.basename))
-    print("chunks: {}".format(args.chunks))
+    print("database file: {}".format(args.database))
     return args
 
 
 def main():
     args = get_args()
-    parse_results(args.basename, args.chunks)
+    db = Database(args.database)
+    parse_results()
 
 
 if __name__ == "__main__":

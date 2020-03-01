@@ -1,10 +1,12 @@
 import re
 import argparse
 import json
+import datetime
 
 from selenium.common.exceptions import NoSuchElementException
 
 import lib
+from model import Database, Group, Event
 
 
 def get_group_events(driver, gid):
@@ -31,63 +33,27 @@ def get_group_events(driver, gid):
     return event_ids
 
 
-def get_all_events(input_filename, id_="", headless=False):
-    # load group ids
-    with open(input_filename) as file:
-        group_ids = json.load(file)
+def get_all_events(driver):
+    while True:
+        group_count = Group.select().where(Group.fetched_events == False).count()
+        if group_count == 0:
+            break
+        
+        group = Group.get(Group.fetched_events == False)
+        print("Processing {} groups. Fetching events.".format(group_count), flush=True)
 
-    print("Imported {} groups.".format(len(group_ids)), flush=True)
-
-    # login facebook
-    driver = lib.create_driver(headless)
-
-    lib.login_facebook(driver)
-
-    # get events
-
-    all_group_events = {}
-
-    for index, group_id in enumerate(group_ids, start=1):
-        print("Fetching events {} of {} ({})".format(index, len(group_ids), group_id), flush=True)
-        group_events = get_group_events(driver, group_id)
-        all_group_events.update(group_events)
+        group_events = get_group_events(driver, group.id)
+        for event_id, data in group_events.items():
+            event = Event.get_or_create(id=event_id)[0]
+            event.name = data["name"]
+            event.location = data["location"]
+            event.image = data["image"]
+            event.save()
         print("Found {} events".format(len(group_events)), flush=True)
-
-    print("\nFound {} events in total".format(len(all_group_events)))
-
-    # store
-
-    filename = lib.tagged_filename("events{}.txt".format(id_))
-
-    with open(filename, 'w') as file:
-        json.dump(all_group_events, file, indent=4, sort_keys=True)
-
-    print("written", filename, flush=True)
-
-    # exit chrome
-
-    driver.close()
-
-    print("Done...", flush=True)
-
-
-def get_args():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("input_file", type=str, help="input file with group ids")
-    parser.add_argument("--headless", help="run chrome in headless mode", action="store_true")
-    parser.add_argument("--id", type=str, help="id appended to output filename", default="")
-    args = parser.parse_args()
-    print("input_file: {}".format(args.input_file))
-    print("id: {}".format(args.id))
-    if args.headless:
-        print("headless turned on")
-    return args
-
-
-def main():
-    args = get_args()
-    get_all_events(args.input_file, args.id, args.headless)
-
-
-if __name__ == "__main__":
-    main()
+                
+        group.fetched_events = True
+        group.last_fetched = datetime.datetime.utcnow()
+        group.save()
+            
+        if len(group_events) > 0:
+            break

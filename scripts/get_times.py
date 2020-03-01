@@ -1,10 +1,13 @@
 
 import argparse
 import json
+import datetime
 
+from peewee import DoesNotExist
 from selenium.common.exceptions import NoSuchElementException
 
 import lib
+from model import Database, Event, EventTime
 
 
 
@@ -15,6 +18,7 @@ def parse_event_time(item):
         print("exception")
         from_to = ""
     return from_to
+
 
 def get_event_time(driver, eid):
     driver.get("https://www.facebook.com/events/" + eid)
@@ -39,61 +43,32 @@ def get_event_time(driver, eid):
         return {"recurring": False, "times": [parse_event_time(driver)]}
 
 
-def get_all_times(input_filename, id_="", headless=False):
-    # read event ids
-    with open(input_filename) as file:
-        event_data = json.load(file)
+def get_all_times(driver):
+    while True:
+        event_count = Event.select().where(Event.fetched_times == False).count()
+        if event_count == 0:
+            break
 
-    print("Imported {} events.".format(len(event_data)), flush=True)
+        event = Event.get(Event.fetched_times == False)
+        print("Processing {} events. Fetching times.".format(event_count), flush=True)
 
-    # login facebook
-    driver = lib.create_driver(headless)
+        result = get_event_time(driver, event.id)
+        for time_str in result["times"]:
+            t_from, t_delta = lib.parse_time_string(time_str)
 
-    lib.login_facebook(driver)
+            event_time = EventTime(event=event, time_str=time_str,
+                    time_from=t_from.astimezone(datetime.timezone.utc).replace(tzinfo=None),
+                    time_delta=t_delta)
+            try:
+                event_time.id = EventTime.get(event=event, time_str=time_str).id
+            except DoesNotExist:
+                pass
+            event_time.save()
+            
+        event.recurring = int(result["recurring"])
+        event.fetched_times = True
+        event.last_fetched = datetime.datetime.utcnow()
+        event.save()
+        print("Found {} times".format(len(result["times"])), flush=True)
 
-    # get times
-
-    for index, event_id in enumerate(event_data, start=1):
-        print("Fetching events {} of {} ({})".format(index, len(event_data), event_id), flush=True)
-        result = get_event_time(driver, event_id)
-        print(event_id, result, flush=True)
-        event_data[event_id].update(result)
-
-    print("Processed {} events.".format(len(event_data)), flush=True)
-
-    # store results
-
-    filename = lib.tagged_filename("times{}.txt".format(id_))
-
-    with open(filename, 'w') as file:
-        json.dump(event_data, file, indent=4, sort_keys=True)
-
-    print("written", filename, flush=True)
-
-    # exit chrome
-
-    driver.close()
-
-    print("Done...", flush=True)
-
-
-def get_args():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("input_file", type=str, help="input file with group ids")
-    parser.add_argument("--headless", help="run chrome in headless mode", action="store_true")
-    parser.add_argument("--id", type=str, help="id appended to output filename", default="")
-    args = parser.parse_args()
-    print("input_file: {}".format(args.input_file))
-    print("id: {}".format(args.id))
-    if args.headless:
-        print("headless turned on")
-    return args
-
-
-def main():
-    args = get_args()
-    get_all_times(args.input_file, args.id, args.headless)
-
-
-if __name__ == "__main__":
-    main()
+        break

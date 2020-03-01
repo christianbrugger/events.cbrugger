@@ -2,7 +2,10 @@
 import sys
 import os
 import time
+import datetime
 
+import dateutil.parser
+import dateutil.tz
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.keys import Keys
@@ -21,6 +24,8 @@ FILE_TAG = os.environ.get("FILE_TAG", None)
 SCROLL_PAUSE_TIME = 3.0 # seconds
 
 EXIT_FILE_MISSING = 66
+
+TIMEZONE = "Europe/Berlin"
 
 def scroll_to_bottom(driver, scroll_pause_time=SCROLL_PAUSE_TIME):
     # Get scroll height
@@ -44,6 +49,7 @@ def create_driver(headless=False):
         options.add_argument("--headless")
         options.add_argument("--disable-gpu")
         options.add_argument('--no-sandbox')
+    options.add_argument('log-level=2')
     options.add_argument("--disable-notifications")
     options.add_experimental_option('prefs', {
         'credentials_enable_service': False,
@@ -73,13 +79,13 @@ def login_facebook(driver):
         # verify login
         try:
             composer_text = driver.find_element_by_id("pagelet_composer").text
-            success = "Create Post" in composer_text and "What's on your mind" in composer_text
+            success = "Create Post" in composer_text
         except NoSuchElementException:
             pass
 
         if not success:
             print("WARNING: Login was not successfull. Retry in 60 seconds.", flush=True)
-            time.sleep(60)
+            time.sleep(3)
 
     print("Login completed", flush=True)
 
@@ -93,3 +99,25 @@ def split(a, n):
     """ splits list a in n parts """
     k, m = divmod(len(a), n)
     return (a[i * k + min(i, m):(i + 1) * k + min(i + 1, m)] for i in range(n))
+
+def parse_time_string(from_to):
+    """
+    parses facebook time string and returns start time and time delta.
+
+    start time is returned as localized datetime object
+    time delta is returned as float, hours
+    """
+    tz = dateutil.tz.gettz(TIMEZONE)
+    if " to " in from_to:
+        from_str, to_str = from_to.split(" to ")
+        dt_from = dateutil.parser.parse(from_str).astimezone(tz)
+        dt_to = dateutil.parser.parse(to_str).astimezone(tz)
+
+        dt_start = dt_from
+
+        td = (dt_to - dt_from).total_seconds() / 3600.
+    else:
+        dt_start = dateutil.parser.parse(from_to).astimezone(tz)
+        td = -1.
+    
+    return dt_start, td
