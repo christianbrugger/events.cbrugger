@@ -32,6 +32,7 @@ def fetch_groups(driver, ignored_group_ids):
 
 
 def get_groups(driver, ignored_group_ids=IGNORED_GROUP_IDS):
+    print("\nScanning for new groups:")
     # get all event ids
     group_ids = fetch_groups(driver, ignored_group_ids)
     print("Found {} groups.".format(len(group_ids)), flush=True)

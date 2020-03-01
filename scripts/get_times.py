@@ -43,7 +43,9 @@ def get_event_time(driver, eid):
         return {"recurring": False, "times": [parse_event_time(driver)]}
 
 
-def get_all_times(driver):
+def get_all_times(driver, debug=False):
+    print("\nScanning for event times:")
+    
     while True:
         event_count = Event.select().where(Event.fetched_times == False).count()
         if event_count == 0:
@@ -71,4 +73,5 @@ def get_all_times(driver):
         event.save()
         print("Found {} times".format(len(result["times"])), flush=True)
 
-        break
+        if debug:
+            break

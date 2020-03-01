@@ -132,8 +132,8 @@ def write_index(filepath):
         <body>\n
         """)
 
-        for filename in sorted(os.listdir("."), reverse=True):
-            if filename.endswith(".html") and filename != filepath:
+        for filename in sorted(os.listdir(os.path.dirname(filepath)), reverse=True):
+            if filename.endswith(".html") and filename != os.path.basename(filepath):
                 f.write('<h1><a class="" href="{}">{}</a></h1>\n'.format(
                     filename, os.path.splitext(filename)[0]))
         
@@ -156,11 +156,14 @@ def get_rsvp():
 ParsedEvent = collections.namedtuple("ParseEvent",
         ["event_id", "name", "location", "image", "recurring", "start_time", "event_type"])
 
-def parse_results():
+
+def parse_results(result_folder, delete_old_files=True):
     tz = dateutil.tz.gettz(TIMEZONE)
-    
+
+    print("\nParsing results:")
     # import event data
     parsed_events = []
+    past_count = 0
     for event_time in EventTime.select():
         event = event_time.event
 
@@ -168,20 +171,27 @@ def parse_results():
         start_time = event_time.time_from.replace(tzinfo=datetime.timezone.utc).astimezone(tz)
 
         parsed_event = ParsedEvent(event.id, event.name, event.location, event.image, 
-                event.recurring, event_time.time_from.astimezone(tz), event_type)
+                event.recurring, start_time, event_type)
         
         if start_time.date() < datetime.datetime.now().date():
-            print("Skipping event, event is in the past:", parsed_event.name)
+            past_count += 1
         else:
             parsed_events.append(parsed_event)
+    print("Skipping {} events in the past.".format(past_count))
 
     # sort data
     sorted_data = sorted(parsed_events, key=lambda x: x.start_time)
     print("Imported {} events.".format(len(sorted_data)), flush=True)
 
+    # delete html files
+    if delete_old_files:
+        for filename in os.listdir(result_folder):
+            if filename.endswith(".html"):
+                os.remove(os.path.join(result_folder, filename))
+
     # write html files    
     default_tag = datetime.datetime.now().strftime("%Y_%m_%d__%H_%M")
-    T = lambda name: lib.tagged_filename(name, default_tag)
+    T = lambda name: lib.tagged_filename(result_folder, name, default_tag)
 
     # all
     write_html_output(T("events.html"), sorted_data)
@@ -204,23 +214,4 @@ def parse_results():
     write_html_output(T("events_evenings.html"), evening_workshops)
 
     # index
-    write_index("index.html")
-
-
-def get_args():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--database", "-d", default="events.db", type=str,
-                        help="database file (default: events.db)")
-    args = parser.parse_args()
-    print("database file: {}".format(args.database))
-    return args
-
-
-def main():
-    args = get_args()
-    db = Database(args.database)
-    parse_results()
-
-
-if __name__ == "__main__":
-    main()
+    write_index(os.path.join(result_folder, "index.html"))

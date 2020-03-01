@@ -90,10 +90,10 @@ def login_facebook(driver):
     print("Login completed", flush=True)
 
 
-def tagged_filename(filename, default=""):
+def tagged_filename(folder, filename, default=""):
     tag = FILE_TAG or default
     filename = '{}_{}'.format(tag, filename)
-    return filename
+    return os.path.join(folder, filename)
 
 def split(a, n):
     """ splits list a in n parts """

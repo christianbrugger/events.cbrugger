@@ -18,6 +18,7 @@ class Group(Model):
     id = CharField(primary_key=True)
     fetched_events = BooleanField(default=False)
     last_fetched = DateTimeField(default=datetime.datetime.fromtimestamp(0))
+    events_found = IntegerField(default=-1)
     class Meta:
         database = proxy
 

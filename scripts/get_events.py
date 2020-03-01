@@ -11,7 +11,6 @@ from model import Database, Group, Event
 
 def get_group_events(driver, gid):
     driver.get("https://www.facebook.com/groups/" + gid + "/events/")
-
     lib.scroll_to_bottom(driver)
 
     event_ids = {}
@@ -33,7 +32,9 @@ def get_group_events(driver, gid):
     return event_ids
 
 
-def get_all_events(driver):
+def get_all_events(driver, debug=True):
+    print("\nScanning for new events:")
+    
     while True:
         group_count = Group.select().where(Group.fetched_events == False).count()
         if group_count == 0:
@@ -53,7 +54,8 @@ def get_all_events(driver):
                 
         group.fetched_events = True
         group.last_fetched = datetime.datetime.utcnow()
+        group.events_found = len(group_events)
         group.save()
             
-        if len(group_events) > 0:
+        if debug and len(group_events) > 0:
             break
