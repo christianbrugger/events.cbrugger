@@ -42,14 +42,17 @@ def scroll_to_bottom(driver, scroll_pause_time=SCROLL_PAUSE_TIME):
         last_height = new_height
 
 
-
-def create_driver(headless=False):
+def create_driver(headless=False, profile_path=None, open_devtools=False, log_level=2):
+    """
+    log_level:
+        3: only fatal
+    """
     options = Options()
     if headless:
         options.add_argument("--headless")
         options.add_argument("--disable-gpu")
         options.add_argument('--no-sandbox')
-    options.add_argument('log-level=2')
+    options.add_argument('log-level={}'.format(log_level))
     options.add_argument("--disable-notifications")
     options.add_experimental_option('prefs', {
         'credentials_enable_service': False,
@@ -57,6 +60,10 @@ def create_driver(headless=False):
             'password_manager_enabled': False
         }
     })
+    if profile_path:
+        options.add_argument('user-data-dir={}'.format(profile_path))
+    if open_devtools:
+        options.add_argument("--auto-open-devtools-for-tabs")
 
     driver = webdriver.Chrome(options=options)
 
@@ -64,11 +71,26 @@ def create_driver(headless=False):
 
     return driver
 
+
+def logged_in(driver):
+    try:
+        driver.find_element_by_xpath("//div[@aria-label='Account']")
+        return True
+    except NoSuchElementException:
+        return False
+
+
 def login_facebook(driver):
-    success = False
     
-    while not success:
+    while True:
         driver.get("http://www.facebook.org")
+
+        if logged_in(driver):
+            print("Already logged in")
+            break
+
+        # provide credentials
+        print("Not logged in. Providing login...")
         assert "Facebook" in driver.title
         elem = driver.find_element_by_id("email")
         elem.send_keys(username)
@@ -76,16 +98,11 @@ def login_facebook(driver):
         elem.send_keys(password)
         elem.send_keys(Keys.RETURN)
 
-        # verify login
-        try:
-            composer_text = driver.find_element_by_id("pagelet_composer").text
-            success = "Create Post" in composer_text
-        except NoSuchElementException:
-            pass
+        if logged_in(driver):
+            break
 
-        if not success:
-            print("WARNING: Login was not successfull. Retry in 60 seconds.", flush=True)
-            time.sleep(3)
+        print("WARNING: Login was not successfull. Retry in 60 seconds.", flush=True)
+        time.sleep(3)
 
     print("Login completed", flush=True)
 

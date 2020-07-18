@@ -11,3 +11,6 @@ chromedriver
 env/
 
 __pycache__
+
+.selenium
+.idea

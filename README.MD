@@ -62,6 +62,7 @@ It is best to use a virtual environment with all the dependencies. You can do th
 ```
 python -m venv env
 .\env\Scripts\activate
+python -m pip install --upgrade pip
 python -m pip install -r requirements.txt
 ```
 
